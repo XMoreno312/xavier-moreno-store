@@ -2,9 +2,9 @@
 
 The landing hero auto-detects files in this folder. Drop them in with these exact names and they activate on the next deploy — no code changes needed.
 
-## Slots
+The logo itself is the canonical `XM_TM5.png` at `/public/XM_TM5.png`, shared with the site header via `components/Logo.jsx`. Update that file to refresh the mark everywhere at once.
 
-**`logo.svg`** — Your custom wordmark / logo. Replaces the "XAVIER MORENO" placeholder. SVG preferred so it stays crisp at any size. Keep it roughly 4:1 to 6:1 aspect ratio (wide wordmark) for best layout. Target height at display: 80–96px.
+## Slots
 
 **`loop.mp4`** — Cinematic background video loop. Muted, silent-safe, slow. Fades in over the parallax layers the moment it can play. Recommended: 1080p (or 720p for faster load), 10–20s clean loop, H.264 MP4, under ~6MB. Think abstract texture / light / landscape, not a storyline.
 
@@ -13,5 +13,5 @@ The landing hero auto-detects files in this folder. Drop them in with these exac
 ## Notes
 
 - Files are served from `/hero/<filename>` at runtime.
-- If a file is missing, the hero silently falls back (placeholder logo, parallax-only background, no audio toggle). Nothing breaks.
+- If a file is missing, the hero silently falls back (parallax-only background, no audio toggle). Nothing breaks.
 - To preview locally: `npm run dev`, then open `http://localhost:3000`.
