@@ -1,12 +1,20 @@
+"use client";
+
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 
 const navLinks = [
-  { href: "/", label: "Beats" },
+  { href: "/beats", label: "Beats" },
   { href: "/licensing", label: "Licensing" },
-  { href: "/#contact", label: "Contact" },
+  { href: "mailto:bishopxavier20@gmail.com", label: "Contact" },
 ];
 
 export default function Header() {
+  const pathname = usePathname();
+
+  // The hero on `/` owns the whole viewport — no chrome.
+  if (pathname === "/") return null;
+
   return (
     <div className="sticky top-0 z-30 border-b border-cream/10 bg-ink/80 backdrop-blur">
       <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-4 sm:px-6">
@@ -36,4 +44,3 @@ export default function Header() {
     </div>
   );
 }
-

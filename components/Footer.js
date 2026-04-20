@@ -1,4 +1,13 @@
+"use client";
+
+import { usePathname } from "next/navigation";
+
 export default function Footer() {
+  const pathname = usePathname();
+
+  // Hero on `/` owns the viewport — no footer.
+  if (pathname === "/") return null;
+
   return (
     <footer
       id="contact"
