@@ -17,7 +17,7 @@ export default function QuietMoment() {
     <section
       aria-label="Every production starts here"
       className="relative w-full overflow-hidden bg-stage text-bone"
-      style={{ minHeight: "70vh", height: "70vh" }}
+      style={{ minHeight: "50vh", height: "50vh" }}
     >
       {/* Bokeh background — slow drift */}
       <motion.div

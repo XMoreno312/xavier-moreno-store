@@ -26,7 +26,7 @@ export default function AtmosphericBio() {
     <section
       aria-label="Xavier Moreno — bio"
       className="relative w-full overflow-hidden bg-stage text-bone"
-      style={{ minHeight: "100vh" }}
+      style={{ minHeight: "70vh" }}
     >
       {/* Photo collage layer — absolutely positioned, bleeds off every edge */}
       <div
@@ -223,7 +223,7 @@ export default function AtmosphericBio() {
       />
 
       {/* Bio text — layered over the darker gaps */}
-      <div className="relative z-10 mx-auto flex min-h-screen w-full max-w-[1400px] flex-col justify-center px-6 py-28 sm:px-10 md:items-start md:justify-center md:py-32 lg:px-20">
+      <div className="relative z-10 mx-auto flex w-full max-w-[1400px] flex-col justify-center px-6 py-20 sm:px-10 md:items-start md:justify-center md:py-24 lg:px-20" style={{ minHeight: "70vh" }}>
         <motion.h2
           initial={{ opacity: 0, y: 14 }}
           whileInView={{ opacity: 1, y: 0 }}

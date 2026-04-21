@@ -31,7 +31,7 @@ function PlayGlyph({ playing }) {
  * licensing is surfaced. The little play button on the cover is the
  * only transactional affordance on this page, and it's a preview only.
  */
-export default function ProductionCard({ beat, index = 0, releaseNo }) {
+export default function ProductionCard({ beat, index = 0, releaseNo, showLicenseCta = false }) {
   const { currentBeat, isPlaying, playBeat } = useAudioPlayer();
   const isCurrent = currentBeat?.id === beat.id;
   const playingThis = isCurrent && isPlaying;
@@ -158,10 +158,16 @@ export default function ProductionCard({ beat, index = 0, releaseNo }) {
             </span>
           </div>
 
-          {/* Quiet CTA — appears on hover, deliberate fade */}
+          {/* Quiet CTA — always visible on the homepage variant, hover-only
+              in the full catalogue so the /beats grid still breathes. */}
           <div className="mt-7 h-4">
             <span
-              className="inline-flex items-center gap-2 text-[10px] text-bone/75 opacity-0 transition-opacity duration-[800ms] group-hover:opacity-100 group-focus-within:opacity-100"
+              className={[
+                "inline-flex items-center gap-2 text-[10px] text-bone/75 transition-opacity duration-[800ms]",
+                showLicenseCta
+                  ? "opacity-100"
+                  : "opacity-0 group-hover:opacity-100 group-focus-within:opacity-100",
+              ].join(" ")}
               style={{
                 letterSpacing: "0.32em",
                 textTransform: "uppercase",

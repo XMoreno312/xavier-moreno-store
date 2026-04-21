@@ -5,7 +5,7 @@ import { motion } from "framer-motion";
 import { useRouter } from "next/navigation";
 import BackgroundVisual from "./BackgroundVisual";
 import LogoAnimation from "./LogoAnimation";
-import EnterButton from "./EnterButton";
+import HeroCTA from "./HeroCTA";
 
 // Long, restrained easings. Nothing snappy lives here on purpose.
 const EASE_SILK = [0.22, 0.6, 0.24, 1];
@@ -130,7 +130,24 @@ export default function Hero() {
             Productions for artists who feel everything
           </motion.p>
 
-          <EnterButton onClick={handleEnter} delay={3.3} disabled={isExiting} />
+          {/* Tagline — serif, bone, editorial. Pure line. No button chrome,
+              no hover underline. It sits on the page like a dedication. */}
+          <motion.p
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 1.6, delay: 3.3, ease: EASE_SILK }}
+            className="mt-12 font-display text-bone sm:mt-14"
+            style={{
+              fontSize: "clamp(1.35rem, 2.1vw, 1.9rem)",
+              fontWeight: 400,
+              letterSpacing: "-0.005em",
+              lineHeight: 1.15,
+            }}
+          >
+            Welcome to my collection.
+          </motion.p>
+
+          <HeroCTA onExit={handleEnter} disabled={isExiting} delay={3.9} />
         </div>
 
         {/* Ambient audio — muted by default; tasteful unmute toggle */}
