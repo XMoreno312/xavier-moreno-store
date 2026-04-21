@@ -21,27 +21,30 @@ export default function BeatPage({ params }) {
   const beat = getBeatById(params.id);
   if (!beat) notFound();
 
+  // Canonical catalog number, from the source order
+  const i = beats.findIndex((b) => b.id === beat.id);
+  const releaseNo = i >= 0 ? String(i + 1).padStart(3, "0") : "000";
+
   return (
-    <div className="mx-auto max-w-5xl px-6 pb-24 pt-6 sm:px-8 sm:pb-32 sm:pt-10">
+    <div className="mx-auto max-w-5xl px-6 pb-32 pt-10 sm:px-8 sm:pb-40 sm:pt-16">
       <Link
         href="/beats"
-        className="inline-flex items-center gap-3 text-[10px] text-silver transition-colors duration-500 hover:text-bone"
-        style={{ letterSpacing: "0.32em", textTransform: "uppercase" }}
+        className="group inline-flex items-center gap-4 text-[10px] text-silver transition-colors duration-[700ms] hover:text-bone"
+        style={{
+          letterSpacing: "0.38em",
+          textTransform: "uppercase",
+          transitionTimingFunction: "cubic-bezier(0.22, 0.6, 0.24, 1)",
+        }}
       >
-        <svg
-          viewBox="0 0 24 24"
-          className="h-3 w-3"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="1.2"
+        <span
           aria-hidden
-        >
-          <path d="M15 18l-6-6 6-6" strokeLinecap="round" strokeLinejoin="round" />
-        </svg>
-        Back to the Catalogue
+          className="inline-block h-px w-6 bg-silver/40 transition-all duration-[700ms] group-hover:w-8 group-hover:bg-bone/60"
+          style={{ transitionTimingFunction: "cubic-bezier(0.22, 0.6, 0.24, 1)" }}
+        />
+        Back to the Archive
       </Link>
 
-      <BeatDetailClient beat={beat} tiers={LICENSE_TIERS} />
+      <BeatDetailClient beat={beat} tiers={LICENSE_TIERS} releaseNo={releaseNo} />
     </div>
   );
 }

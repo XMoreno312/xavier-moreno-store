@@ -5,9 +5,10 @@ import { motion } from "framer-motion";
 import { useAudioPlayer } from "@/components/AudioPlayerProvider";
 import CoverStill from "@/components/beats/CoverStill";
 
-const EASE_SILK = [0.22, 1, 0.36, 1];
+// Same curve as the landing + masthead + cards — one vocabulary.
+const EASE_SILK = [0.22, 0.6, 0.24, 1];
 
-export default function BeatDetailClient({ beat, tiers }) {
+export default function BeatDetailClient({ beat, tiers, releaseNo }) {
   const { currentBeat, isPlaying, playBeat } = useAudioPlayer();
   const [selectedTier, setSelectedTier] = useState(tiers[0].id);
 
@@ -28,18 +29,18 @@ export default function BeatDetailClient({ beat, tiers }) {
 
   return (
     <motion.article
-      initial={{ opacity: 0, y: 12 }}
+      initial={{ opacity: 0, y: 14 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 1.1, ease: EASE_SILK }}
-      className="mt-10 sm:mt-14"
+      transition={{ duration: 1.3, ease: EASE_SILK }}
+      className="mt-16 sm:mt-24"
     >
       {/* Masthead of the release */}
-      <div className="grid grid-cols-1 gap-10 md:grid-cols-[minmax(0,0.95fr)_minmax(0,1fr)] md:gap-16">
+      <div className="grid grid-cols-1 gap-14 md:grid-cols-[minmax(0,0.95fr)_minmax(0,1fr)] md:gap-20">
         {/* Cover */}
         <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 1.4, ease: EASE_SILK }}
+          initial={{ opacity: 0, scale: 0.995, filter: "blur(4px)" }}
+          animate={{ opacity: 1, scale: 1, filter: "blur(0px)" }}
+          transition={{ duration: 1.6, delay: 0.15, ease: EASE_SILK }}
           className="md:sticky md:top-28 md:self-start"
         >
           <CoverStill
@@ -51,49 +52,90 @@ export default function BeatDetailClient({ beat, tiers }) {
 
         {/* Info */}
         <div className="flex flex-col">
-          <p
-            className="text-[10px] text-silver"
-            style={{ letterSpacing: "0.5em", textTransform: "uppercase" }}
+          {/* Eyebrow — catalog number + volume + genre, editorial */}
+          <motion.div
+            initial={{ opacity: 0, y: 6 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 1.4, delay: 0.25, ease: EASE_SILK }}
+            className="flex items-center gap-3"
           >
-            Volume I — {beat.genre}
-          </p>
+            {releaseNo ? (
+              <>
+                <span
+                  className="text-[9.5px] text-silver/75"
+                  style={{
+                    letterSpacing: "0.5em",
+                    textTransform: "uppercase",
+                    fontVariant: "small-caps",
+                  }}
+                >
+                  № {releaseNo}
+                </span>
+                <span className="h-px w-4 bg-silver/25" aria-hidden />
+              </>
+            ) : null}
+            <span
+              className="text-[10px] text-silver"
+              style={{ letterSpacing: "0.5em", textTransform: "uppercase" }}
+            >
+              Volume I · {beat.genre}
+            </span>
+          </motion.div>
 
-          <h1
-            className="mt-5 font-display text-4xl leading-[1.05] text-bone sm:text-6xl"
-            style={{ letterSpacing: "-0.01em" }}
+          <motion.h1
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 1.7, delay: 0.45, ease: EASE_SILK }}
+            className="mt-6 font-display text-[2.6rem] leading-[1.02] text-bone sm:text-[4rem]"
+            style={{ letterSpacing: "-0.015em" }}
           >
             {beat.title}
-          </h1>
+          </motion.h1>
 
           {beat.mood ? (
-            <p
-              className="mt-6 max-w-md text-[14px] leading-relaxed text-bone/65 sm:text-[15px]"
-              style={{ fontStyle: "italic" }}
+            <motion.p
+              initial={{ opacity: 0, y: 6 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 1.5, delay: 0.7, ease: EASE_SILK }}
+              className="mt-7 max-w-md text-[13.5px] leading-[1.65] text-bone/55 sm:text-[14.5px]"
+              style={{ fontStyle: "italic", letterSpacing: "0.005em" }}
             >
               {beat.mood}
-            </p>
+            </motion.p>
           ) : null}
 
-          {/* Metadata row */}
-          <div className="mt-8 flex items-center gap-4 text-[10px] text-silver">
-            <span style={{ letterSpacing: "0.3em", textTransform: "uppercase" }}>
+          {/* Metadata row — subdued, thinner dividers */}
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 1.5, delay: 0.9, ease: EASE_SILK }}
+            className="mt-10 flex items-center gap-3 text-[10px] text-silver/80"
+          >
+            <span style={{ letterSpacing: "0.36em", textTransform: "uppercase" }}>
               {beat.key}
             </span>
-            <span className="h-px w-6 bg-silver/30" aria-hidden />
-            <span style={{ letterSpacing: "0.3em", textTransform: "uppercase" }}>
+            <span className="h-px w-5 bg-silver/25" aria-hidden />
+            <span style={{ letterSpacing: "0.36em", textTransform: "uppercase" }}>
               {beat.bpm} BPM
             </span>
-            <span className="h-px w-6 bg-silver/30" aria-hidden />
-            <span style={{ letterSpacing: "0.3em", textTransform: "uppercase" }}>
+            <span className="h-px w-5 bg-silver/25" aria-hidden />
+            <span style={{ letterSpacing: "0.36em", textTransform: "uppercase" }}>
               {beat.genre}
             </span>
-          </div>
+          </motion.div>
 
-          {/* Preview button — same editorial language as the bar */}
-          <button
+          {/* Preview — editorial line, not a media-player button */}
+          <motion.button
+            initial={{ opacity: 0, y: 6 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 1.5, delay: 1.1, ease: EASE_SILK }}
             onClick={() => playBeat(beat)}
-            className="mt-10 inline-flex items-center gap-3 self-start border-b border-bone/30 pb-2 text-[10px] text-bone transition-colors duration-500 hover:border-bone hover:text-bone"
-            style={{ letterSpacing: "0.32em", textTransform: "uppercase" }}
+            className="group mt-12 inline-flex items-center gap-4 self-start pb-2 text-[10px] text-bone/85 transition-colors duration-[700ms] hover:text-bone"
+            style={{
+              letterSpacing: "0.36em",
+              textTransform: "uppercase",
+              transitionTimingFunction: "cubic-bezier(0.22, 0.6, 0.24, 1)",
+            }}
           >
             {playingThis ? (
               <>
@@ -101,68 +143,81 @@ export default function BeatDetailClient({ beat, tiers }) {
                   <rect x="7" y="5" width="3" height="14" rx="0.6" />
                   <rect x="14" y="5" width="3" height="14" rx="0.6" />
                 </svg>
-                Pause preview
+                Pause Preview
               </>
             ) : (
               <>
                 <svg viewBox="0 0 24 24" className="h-3 w-3" fill="currentColor" aria-hidden>
                   <path d="M7 5v14l12-7L7 5z" />
                 </svg>
-                Play preview
+                Play Preview
               </>
             )}
-          </button>
+            <span
+              aria-hidden
+              className="inline-block h-px w-6 bg-bone/30 transition-all duration-[700ms] group-hover:w-10 group-hover:bg-bone/70"
+              style={{ transitionTimingFunction: "cubic-bezier(0.22, 0.6, 0.24, 1)" }}
+            />
+          </motion.button>
 
-          {/* Licensing block */}
-          <section className="mt-16">
+          {/* Licensing block — more breathing room, quieter dividers */}
+          <motion.section
+            initial={{ opacity: 0, y: 10 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: "-15%" }}
+            transition={{ duration: 1.4, ease: EASE_SILK }}
+            className="mt-24 sm:mt-28"
+          >
             <p
               className="text-[10px] text-silver"
-              style={{ letterSpacing: "0.5em", textTransform: "uppercase" }}
+              style={{ letterSpacing: "0.52em", textTransform: "uppercase" }}
             >
               Licensing
             </p>
             <h2
-              className="mt-4 font-display text-2xl text-bone sm:text-3xl"
-              style={{ letterSpacing: "-0.005em" }}
+              className="mt-5 font-display text-[1.7rem] leading-[1.1] text-bone sm:text-[2.1rem]"
+              style={{ letterSpacing: "-0.008em" }}
             >
               Choose a license.
             </h2>
-            <p className="mt-3 max-w-md text-[13px] leading-relaxed text-bone/55">
+            <p className="mt-5 max-w-md text-[13px] leading-[1.7] text-bone/55">
               All leases are delivered untagged. An exclusive removes the
               production from the catalogue and transfers master use rights.
             </p>
 
-            {/* Tier selector — editorial, not storefront */}
-            <div className="mt-8 divide-y divide-bone/10 border-y border-bone/10">
+            {/* Tier selector — editorial, not storefront. More vertical rhythm,
+                quieter dividers (bone/5 instead of bone/10). */}
+            <div className="mt-10 divide-y divide-bone/5 border-y border-bone/5">
               {tiers.map((tier) => {
                 const active = tier.id === selectedTier;
                 return (
                   <button
                     key={tier.id}
                     onClick={() => setSelectedTier(tier.id)}
-                    className="group flex w-full items-center justify-between py-5 text-left transition-colors duration-500"
+                    className="group flex w-full items-center justify-between py-7 text-left transition-colors duration-[700ms]"
+                    style={{ transitionTimingFunction: "cubic-bezier(0.22, 0.6, 0.24, 1)" }}
                   >
-                    <div className="flex items-center gap-4">
+                    <div className="flex items-center gap-5">
                       <span
                         aria-hidden
                         className={[
-                          "h-2 w-2 rounded-full border transition-all duration-500",
+                          "h-[7px] w-[7px] rounded-full border transition-all duration-[700ms]",
                           active
                             ? "border-bone bg-bone"
-                            : "border-bone/30 bg-transparent group-hover:border-bone/60",
+                            : "border-bone/25 bg-transparent group-hover:border-bone/55",
                         ].join(" ")}
                       />
                       <span>
                         <span
                           className="block text-[11px] text-bone"
                           style={{
-                            letterSpacing: "0.32em",
+                            letterSpacing: "0.36em",
                             textTransform: "uppercase",
                           }}
                         >
                           {tier.name}
                         </span>
-                        <span className="mt-1 block text-[12px] text-silver">
+                        <span className="mt-1.5 block text-[11.5px] text-silver/85">
                           {tier.delivery}
                         </span>
                       </span>
@@ -179,19 +234,19 @@ export default function BeatDetailClient({ beat, tiers }) {
             </div>
 
             {/* What's included */}
-            <div className="mt-8">
+            <div className="mt-10">
               <p
-                className="text-[10px] text-silver"
-                style={{ letterSpacing: "0.3em", textTransform: "uppercase" }}
+                className="text-[10px] text-silver/85"
+                style={{ letterSpacing: "0.36em", textTransform: "uppercase" }}
               >
                 {selected.name} — Included
               </p>
-              <ul className="mt-4 space-y-3 text-[14px] leading-relaxed text-bone/80">
+              <ul className="mt-5 space-y-4 text-[13.5px] leading-[1.65] text-bone/80">
                 {selected.rights.map((r) => (
                   <li key={r} className="flex gap-4">
                     <span
                       aria-hidden
-                      className="mt-[10px] h-px w-3 flex-shrink-0 bg-silver/50"
+                      className="mt-[10px] h-px w-3 flex-shrink-0 bg-silver/40"
                     />
                     <span>{r}</span>
                   </li>
@@ -199,36 +254,40 @@ export default function BeatDetailClient({ beat, tiers }) {
               </ul>
             </div>
 
-            {/* Primary CTA — editorial, single line */}
+            {/* Primary CTA — editorial, single line, slower transition */}
             <button
               onClick={handleLicense}
-              className="group mt-10 inline-flex items-center gap-4 border border-bone/30 px-6 py-4 text-[10px] text-bone transition-colors duration-500 hover:border-bone hover:bg-bone hover:text-stage"
-              style={{ letterSpacing: "0.35em", textTransform: "uppercase" }}
+              className="group mt-14 inline-flex items-center gap-4 border border-bone/25 px-7 py-4 text-[10px] text-bone transition-colors duration-[700ms] hover:border-bone hover:bg-bone hover:text-stage"
+              style={{
+                letterSpacing: "0.38em",
+                textTransform: "uppercase",
+                transitionTimingFunction: "cubic-bezier(0.22, 0.6, 0.24, 1)",
+              }}
             >
               {selected.id === "exclusive"
                 ? "Inquire for Exclusive"
                 : "License This Production"}
               <span
                 aria-hidden
-                className="transition-transform duration-500 group-hover:translate-x-1"
-                style={{ transitionTimingFunction: "cubic-bezier(0.22, 1, 0.36, 1)" }}
+                className="transition-transform duration-[700ms] group-hover:translate-x-1"
+                style={{ transitionTimingFunction: "cubic-bezier(0.22, 0.6, 0.24, 1)" }}
               >
                 →
               </span>
             </button>
 
-            <p className="mt-6 max-w-md text-[11px] text-silver/80">
+            <p className="mt-7 max-w-md text-[11px] text-silver/75">
               Prefer to talk first?{" "}
               <a
                 href={`mailto:bishopxavier20@gmail.com?subject=${encodeURIComponent(
                   beat.title + " — licensing inquiry"
                 )}`}
-                className="underline decoration-silver/40 underline-offset-4 transition-colors duration-500 hover:text-bone hover:decoration-bone/60"
+                className="underline decoration-silver/30 underline-offset-4 transition-colors duration-[700ms] hover:text-bone hover:decoration-bone/60"
               >
                 Write directly.
               </a>
             </p>
-          </section>
+          </motion.section>
         </div>
       </div>
     </motion.article>
