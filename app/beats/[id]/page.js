@@ -13,7 +13,7 @@ export function generateMetadata({ params }) {
   if (!beat) return { title: "Beat not found — Xavier Moreno" };
   return {
     title: `${beat.title} — Xavier Moreno`,
-    description: `${beat.genre} beat in ${beat.key}, ${beat.bpm} BPM. Lease or go exclusive.`,
+    description: `${beat.genre} production in ${beat.key}, ${beat.bpm} BPM. License MP3, WAV, or Exclusive.`,
   };
 }
 
@@ -22,15 +22,23 @@ export default function BeatPage({ params }) {
   if (!beat) notFound();
 
   return (
-    <div className="mx-auto max-w-4xl px-4 py-10 sm:px-6 sm:py-14">
+    <div className="mx-auto max-w-5xl px-6 pb-24 pt-6 sm:px-8 sm:pb-32 sm:pt-10">
       <Link
         href="/beats"
-        className="inline-flex items-center gap-2 text-xs uppercase tracking-[0.2em] text-cream/60 transition-colors hover:text-gold"
+        className="inline-flex items-center gap-3 text-[10px] text-silver transition-colors duration-500 hover:text-bone"
+        style={{ letterSpacing: "0.32em", textTransform: "uppercase" }}
       >
-        <svg viewBox="0 0 24 24" className="h-3 w-3" fill="none" stroke="currentColor" strokeWidth="2">
+        <svg
+          viewBox="0 0 24 24"
+          className="h-3 w-3"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="1.2"
+          aria-hidden
+        >
           <path d="M15 18l-6-6 6-6" strokeLinecap="round" strokeLinejoin="round" />
         </svg>
-        Back to beats
+        Back to the Catalogue
       </Link>
 
       <BeatDetailClient beat={beat} tiers={LICENSE_TIERS} />

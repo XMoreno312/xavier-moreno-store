@@ -8,20 +8,21 @@
 
 html,
 body {
-  background-color: #141210;
-  color: #e8dfc8;
+  background-color: #0B0B0B;
+  color: #EFE9DD;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* Subtle film-grain feel for the warm dark aesthetic */
+/* Extremely subtle global grain. Quieter than the hero/card grain — this is
+   just enough to keep flat surfaces from feeling digital. */
 body::before {
   content: "";
   position: fixed;
   inset: 0;
   pointer-events: none;
   background-image: radial-gradient(
-    rgba(201, 168, 124, 0.04) 1px,
+    rgba(232, 223, 200, 0.025) 1px,
     transparent 1px
   );
   background-size: 3px 3px;
@@ -29,30 +30,31 @@ body::before {
   mix-blend-mode: soft-light;
 }
 
-/* Custom range slider for audio progress */
+/* Editorial audio scrub line — thin, off-white on near-black */
 input[type="range"].progress {
   -webkit-appearance: none;
   appearance: none;
-  height: 3px;
-  background: rgba(232, 223, 200, 0.18);
+  height: 1px;
+  background: rgba(239, 233, 221, 0.14);
   border-radius: 999px;
   outline: none;
+  cursor: pointer;
 }
 input[type="range"].progress::-webkit-slider-thumb {
   -webkit-appearance: none;
   appearance: none;
-  width: 12px;
-  height: 12px;
+  width: 8px;
+  height: 8px;
   border-radius: 999px;
-  background: #c9a87c;
+  background: #EFE9DD;
   cursor: pointer;
   border: 0;
 }
 input[type="range"].progress::-moz-range-thumb {
-  width: 12px;
-  height: 12px;
+  width: 8px;
+  height: 8px;
   border-radius: 999px;
-  background: #c9a87c;
+  background: #EFE9DD;
   cursor: pointer;
   border: 0;
 }

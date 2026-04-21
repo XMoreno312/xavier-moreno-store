@@ -1,7 +1,11 @@
 "use client";
 
 import { useState } from "react";
+import { motion } from "framer-motion";
 import { useAudioPlayer } from "@/components/AudioPlayerProvider";
+import CoverStill from "@/components/beats/CoverStill";
+
+const EASE_SILK = [0.22, 1, 0.36, 1];
 
 export default function BeatDetailClient({ beat, tiers }) {
   const { currentBeat, isPlaying, playBeat } = useAudioPlayer();
@@ -11,7 +15,7 @@ export default function BeatDetailClient({ beat, tiers }) {
   const playingThis = isCurrent && isPlaying;
   const selected = tiers.find((t) => t.id === selectedTier);
 
-  const handleCheckout = () => {
+  const handleLicense = () => {
     if (selected.id === "exclusive") {
       window.location.href = `mailto:bishopxavier20@gmail.com?subject=Exclusive%20license%20inquiry%20—%20${encodeURIComponent(
         beat.title
@@ -23,130 +27,210 @@ export default function BeatDetailClient({ beat, tiers }) {
   };
 
   return (
-    <article className="mt-6">
-      {/* Hero */}
-      <div className="flex flex-col gap-6 sm:flex-row sm:items-end">
-        <div
-          className="h-40 w-40 flex-shrink-0 rounded-xl border border-cream/10 sm:h-56 sm:w-56"
-          style={{
-            background: `linear-gradient(135deg, ${beat.coverColor || "#2a241c"}, #141210)`,
-          }}
-        />
-        <div className="min-w-0 flex-1">
-          <p className="text-xs uppercase tracking-[0.25em] text-gold">
-            {beat.genre}
+    <motion.article
+      initial={{ opacity: 0, y: 12 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 1.1, ease: EASE_SILK }}
+      className="mt-10 sm:mt-14"
+    >
+      {/* Masthead of the release */}
+      <div className="grid grid-cols-1 gap-10 md:grid-cols-[minmax(0,0.95fr)_minmax(0,1fr)] md:gap-16">
+        {/* Cover */}
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 1.4, ease: EASE_SILK }}
+          className="md:sticky md:top-28 md:self-start"
+        >
+          <CoverStill
+            beat={beat}
+            image={`/beats/covers/${beat.id}.jpg`}
+            aspect="portrait"
+          />
+        </motion.div>
+
+        {/* Info */}
+        <div className="flex flex-col">
+          <p
+            className="text-[10px] text-silver"
+            style={{ letterSpacing: "0.5em", textTransform: "uppercase" }}
+          >
+            Volume I — {beat.genre}
           </p>
-          <h1 className="mt-2 font-display text-3xl leading-tight text-cream sm:text-5xl">
+
+          <h1
+            className="mt-5 font-display text-4xl leading-[1.05] text-bone sm:text-6xl"
+            style={{ letterSpacing: "-0.01em" }}
+          >
             {beat.title}
           </h1>
-          <div className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs uppercase tracking-[0.18em] text-cream/60">
-            <span>{beat.key}</span>
-            <span className="text-cream/25">·</span>
-            <span>{beat.bpm} BPM</span>
-            {beat.mood?.length ? (
-              <>
-                <span className="text-cream/25">·</span>
-                <span>{beat.mood.join(" / ")}</span>
-              </>
-            ) : null}
+
+          {beat.mood ? (
+            <p
+              className="mt-6 max-w-md text-[14px] leading-relaxed text-bone/65 sm:text-[15px]"
+              style={{ fontStyle: "italic" }}
+            >
+              {beat.mood}
+            </p>
+          ) : null}
+
+          {/* Metadata row */}
+          <div className="mt-8 flex items-center gap-4 text-[10px] text-silver">
+            <span style={{ letterSpacing: "0.3em", textTransform: "uppercase" }}>
+              {beat.key}
+            </span>
+            <span className="h-px w-6 bg-silver/30" aria-hidden />
+            <span style={{ letterSpacing: "0.3em", textTransform: "uppercase" }}>
+              {beat.bpm} BPM
+            </span>
+            <span className="h-px w-6 bg-silver/30" aria-hidden />
+            <span style={{ letterSpacing: "0.3em", textTransform: "uppercase" }}>
+              {beat.genre}
+            </span>
           </div>
 
+          {/* Preview button — same editorial language as the bar */}
           <button
             onClick={() => playBeat(beat)}
-            className="mt-5 inline-flex items-center gap-3 rounded-full border border-gold/60 px-5 py-2 text-xs uppercase tracking-[0.2em] text-gold transition-colors hover:bg-gold hover:text-ink"
+            className="mt-10 inline-flex items-center gap-3 self-start border-b border-bone/30 pb-2 text-[10px] text-bone transition-colors duration-500 hover:border-bone hover:text-bone"
+            style={{ letterSpacing: "0.32em", textTransform: "uppercase" }}
           >
             {playingThis ? (
               <>
-                <svg viewBox="0 0 24 24" className="h-3 w-3" fill="currentColor">
-                  <rect x="6" y="5" width="4" height="14" rx="1" />
-                  <rect x="14" y="5" width="4" height="14" rx="1" />
+                <svg viewBox="0 0 24 24" className="h-3 w-3" fill="currentColor" aria-hidden>
+                  <rect x="7" y="5" width="3" height="14" rx="0.6" />
+                  <rect x="14" y="5" width="3" height="14" rx="0.6" />
                 </svg>
                 Pause preview
               </>
             ) : (
               <>
-                <svg viewBox="0 0 24 24" className="h-3 w-3" fill="currentColor">
+                <svg viewBox="0 0 24 24" className="h-3 w-3" fill="currentColor" aria-hidden>
                   <path d="M7 5v14l12-7L7 5z" />
                 </svg>
                 Play preview
               </>
             )}
           </button>
+
+          {/* Licensing block */}
+          <section className="mt-16">
+            <p
+              className="text-[10px] text-silver"
+              style={{ letterSpacing: "0.5em", textTransform: "uppercase" }}
+            >
+              Licensing
+            </p>
+            <h2
+              className="mt-4 font-display text-2xl text-bone sm:text-3xl"
+              style={{ letterSpacing: "-0.005em" }}
+            >
+              Choose a license.
+            </h2>
+            <p className="mt-3 max-w-md text-[13px] leading-relaxed text-bone/55">
+              All leases are delivered untagged. An exclusive removes the
+              production from the catalogue and transfers master use rights.
+            </p>
+
+            {/* Tier selector — editorial, not storefront */}
+            <div className="mt-8 divide-y divide-bone/10 border-y border-bone/10">
+              {tiers.map((tier) => {
+                const active = tier.id === selectedTier;
+                return (
+                  <button
+                    key={tier.id}
+                    onClick={() => setSelectedTier(tier.id)}
+                    className="group flex w-full items-center justify-between py-5 text-left transition-colors duration-500"
+                  >
+                    <div className="flex items-center gap-4">
+                      <span
+                        aria-hidden
+                        className={[
+                          "h-2 w-2 rounded-full border transition-all duration-500",
+                          active
+                            ? "border-bone bg-bone"
+                            : "border-bone/30 bg-transparent group-hover:border-bone/60",
+                        ].join(" ")}
+                      />
+                      <span>
+                        <span
+                          className="block text-[11px] text-bone"
+                          style={{
+                            letterSpacing: "0.32em",
+                            textTransform: "uppercase",
+                          }}
+                        >
+                          {tier.name}
+                        </span>
+                        <span className="mt-1 block text-[12px] text-silver">
+                          {tier.delivery}
+                        </span>
+                      </span>
+                    </div>
+                    <span
+                      className="font-display text-[18px] text-bone"
+                      style={{ letterSpacing: "-0.005em" }}
+                    >
+                      {tier.priceLabel}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+
+            {/* What's included */}
+            <div className="mt-8">
+              <p
+                className="text-[10px] text-silver"
+                style={{ letterSpacing: "0.3em", textTransform: "uppercase" }}
+              >
+                {selected.name} — Included
+              </p>
+              <ul className="mt-4 space-y-3 text-[14px] leading-relaxed text-bone/80">
+                {selected.rights.map((r) => (
+                  <li key={r} className="flex gap-4">
+                    <span
+                      aria-hidden
+                      className="mt-[10px] h-px w-3 flex-shrink-0 bg-silver/50"
+                    />
+                    <span>{r}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            {/* Primary CTA — editorial, single line */}
+            <button
+              onClick={handleLicense}
+              className="group mt-10 inline-flex items-center gap-4 border border-bone/30 px-6 py-4 text-[10px] text-bone transition-colors duration-500 hover:border-bone hover:bg-bone hover:text-stage"
+              style={{ letterSpacing: "0.35em", textTransform: "uppercase" }}
+            >
+              {selected.id === "exclusive"
+                ? "Inquire for Exclusive"
+                : "License This Production"}
+              <span
+                aria-hidden
+                className="transition-transform duration-500 group-hover:translate-x-1"
+                style={{ transitionTimingFunction: "cubic-bezier(0.22, 1, 0.36, 1)" }}
+              >
+                →
+              </span>
+            </button>
+
+            <p className="mt-6 max-w-md text-[11px] text-silver/80">
+              Prefer to talk first?{" "}
+              <a
+                href={`mailto:bishopxavier20@gmail.com?subject=${encodeURIComponent(
+                  beat.title + " — licensing inquiry"
+                )}`}
+                className="underline decoration-silver/40 underline-offset-4 transition-colors duration-500 hover:text-bone hover:decoration-bone/60"
+              >
+                Write directly.
+              </a>
+            </p>
+          </section>
         </div>
       </div>
-
-      {/* License tier selector */}
-      <section className="mt-12">
-        <h2 className="font-display text-xl tracking-wide text-cream">
-          Choose a license
-        </h2>
-        <p className="mt-1 text-sm text-cream/50">
-          All leases come with untagged files. Exclusive removes the beat from the store.
-        </p>
-
-        <div className="mt-5 grid gap-3 sm:grid-cols-3">
-          {tiers.map((tier) => {
-            const active = tier.id === selectedTier;
-            return (
-              <button
-                key={tier.id}
-                onClick={() => setSelectedTier(tier.id)}
-                className={[
-                  "rounded-lg border p-4 text-left transition-all",
-                  active
-                    ? "border-gold bg-gold/5"
-                    : "border-cream/10 bg-ink/40 hover:border-cream/25",
-                ].join(" ")}
-              >
-                <div className="flex items-center justify-between">
-                  <p className="text-[11px] uppercase tracking-[0.2em] text-cream/60">
-                    {tier.name}
-                  </p>
-                  <span
-                    className={[
-                      "h-3 w-3 rounded-full border",
-                      active ? "border-gold bg-gold" : "border-cream/30",
-                    ].join(" ")}
-                  />
-                </div>
-                <p className="mt-2 font-display text-xl text-cream">
-                  {tier.priceLabel}
-                </p>
-                <p className="mt-1 text-xs text-cream/50">{tier.delivery}</p>
-              </button>
-            );
-          })}
-        </div>
-
-        {/* Selected tier details */}
-        <div className="mt-6 rounded-lg border border-cream/10 bg-ink/40 p-5">
-          <p className="text-[11px] uppercase tracking-[0.2em] text-cream/50">
-            {selected.name} — what&apos;s included
-          </p>
-          <ul className="mt-3 space-y-2 text-sm text-cream/80">
-            {selected.rights.map((r) => (
-              <li key={r} className="flex gap-3">
-                <span className="mt-[7px] h-[5px] w-[5px] flex-shrink-0 rounded-full bg-gold" />
-                <span>{r}</span>
-              </li>
-            ))}
-          </ul>
-
-          <button
-            onClick={handleCheckout}
-            className={[
-              "mt-6 w-full rounded-md px-4 py-3 text-xs uppercase tracking-[0.2em] transition-colors sm:w-auto",
-              selected.id === "exclusive"
-                ? "border border-gold/60 text-gold hover:bg-gold hover:text-ink"
-                : "bg-gold text-ink hover:bg-cream",
-            ].join(" ")}
-          >
-            {selected.id === "exclusive"
-              ? "Contact for exclusive pricing"
-              : `Checkout — ${selected.priceLabel}`}
-          </button>
-        </div>
-      </section>
-    </article>
+    </motion.article>
   );
 }
