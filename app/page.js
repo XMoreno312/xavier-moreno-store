@@ -1,6 +1,6 @@
 import Hero from "@/components/hero/Hero";
-import PortraitBio from "@/components/portrait/PortraitBio";
-import InTheWork from "@/components/portrait/InTheWork";
+import AtmosphericBio from "@/components/portrait/AtmosphericBio";
+import QuietMoment from "@/components/portrait/QuietMoment";
 
 export const metadata = {
   title: "Xavier Moreno",
@@ -12,8 +12,8 @@ export default function HomePage() {
   return (
     <>
       <Hero />
-      <PortraitBio />
-      <InTheWork />
+      <AtmosphericBio />
+      <QuietMoment />
     </>
   );
 }
