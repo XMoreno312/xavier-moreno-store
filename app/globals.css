@@ -14,6 +14,12 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
+/* Smooth scroll for in-page anchor jumps — gentle on the cinematic transitions.
+   Respects prefers-reduced-motion by default in all modern browsers. */
+html {
+  scroll-behavior: smooth;
+}
+
 /* Extremely subtle global grain. Quieter than the hero/card grain — this is
    just enough to keep flat surfaces from feeling digital. */
 body::before {

@@ -71,8 +71,9 @@ export default function Hero() {
   return (
     <div
       // Outer wrapper is fully opaque and never fades — guarantees no
-      // header/body bg peeks through during the intro fade-in.
-      className="fixed inset-0 z-40 h-[100svh] w-screen overflow-hidden bg-[#0B0B0B]"
+      // header/body bg peeks through during the intro fade-in. Sits in
+      // normal flow so the bio section below it becomes scrollable.
+      className="relative z-40 h-[100svh] w-full overflow-hidden bg-[#0B0B0B]"
     >
       <motion.div
         initial={{ opacity: 0 }}
@@ -142,6 +143,10 @@ export default function Hero() {
           playsInline
         />
 
+        {/* Scroll hint — subtle "scroll" text + down arrow, centered bottom.
+            Users didn't know there was anything below the fold. */}
+        <ScrollHint />
+
         <motion.button
           type="button"
           aria-label={muted ? "Unmute ambient" : "Mute ambient"}
@@ -157,6 +162,50 @@ export default function Hero() {
         </motion.button>
       </motion.div>
     </div>
+  );
+}
+
+function ScrollHint() {
+  return (
+    <motion.div
+      aria-hidden
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 0.55 }}
+      transition={{ duration: 1.6, delay: 4.2, ease: EASE_SILK }}
+      className="pointer-events-none absolute bottom-5 left-1/2 z-10 -translate-x-1/2 sm:bottom-7"
+    >
+      <motion.div
+        className="flex flex-col items-center gap-2 text-white/70"
+        animate={{ y: [0, 6, 0] }}
+        transition={{
+          duration: 3.2,
+          repeat: Infinity,
+          ease: "easeInOut",
+        }}
+      >
+        <span
+          className="uppercase text-[9px] sm:text-[10px]"
+          style={{
+            fontWeight: 300,
+            letterSpacing: "0.42em",
+          }}
+        >
+          Scroll
+        </span>
+        <svg
+          viewBox="0 0 24 24"
+          className="h-3.5 w-3.5"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="1.2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        >
+          <path d="M12 4v14" />
+          <path d="m6 14 6 6 6-6" />
+        </svg>
+      </motion.div>
+    </motion.div>
   );
 }
 
