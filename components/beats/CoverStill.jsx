@@ -1,24 +1,37 @@
 "use client";
 
 import { useState } from "react";
+import { motion } from "framer-motion";
+
+// Shared silk curve — matches the rest of the site.
+const EASE_SILK = [0.22, 1, 0.36, 1];
 
 /**
- * Editorial generative still for each release.
+ * Cinematic release still.
  *
- * Each beat has a signature gradient recipe in `config/beats.js`. We layer:
- *   1. A deep base wash (per-release tint)
- *   2. Two slow-drift orbs that compose the beat's emotional color
- *   3. A tight SVG film-grain overlay
- *   4. A radial vignette that pulls the eye to the center
- *   5. Corner metadata (key · BPM) set small caps / tight tracking
- *   6. A minimal serif ornamental mark opposite the metadata
+ * When a real cover image is present at `/public/beats/covers/{id}.jpg`
+ * we render it in depth: a softly blurred, slightly up-scaled copy sits
+ * beneath a sharp layer to give the artwork a sense of atmosphere, and
+ * the sharp layer drifts through a long, slow Ken Burns cycle. A subtle
+ * animated grain sits over everything, and a strengthened bottom gradient
+ * ensures that the card's text below reads clearly at any size.
  *
- * If a real cover image exists at `/public/beats/covers/{id}.jpg`, pass it
- * via the `image` prop and the generative layers quietly step aside.
+ * When there is no image we keep the tuned generative recipe from
+ * `config/beats.js` — two slow drift orbs on a tinted base, vignette,
+ * grain — and apply the same bottom fade so the card system stays
+ * visually coherent.
  *
- * Keep this restrained — it is art direction, not a pattern library.
+ * `parallaxX` / `parallaxY` may be passed as framer-motion MotionValues
+ * from a parent (ProductionCard) so the interior layers drift a few
+ * pixels in response to the cursor — editorial, not arcade-y.
  */
-export default function CoverStill({ beat, image, aspect = "portrait" }) {
+export default function CoverStill({
+  beat,
+  image,
+  aspect = "portrait",
+  parallaxX,
+  parallaxY,
+}) {
   const [imgOk, setImgOk] = useState(Boolean(image));
 
   const s = beat.signature || {};
@@ -35,6 +48,8 @@ export default function CoverStill({ beat, image, aspect = "portrait" }) {
       ? "aspect-[16/10]"
       : "aspect-[4/5]";
 
+  const hasImage = Boolean(image) && imgOk;
+
   return (
     <div
       className={[
@@ -43,52 +58,112 @@ export default function CoverStill({ beat, image, aspect = "portrait" }) {
       ].join(" ")}
       style={{ backgroundColor: base }}
     >
-      {/* Real cover art — swaps in the moment public/beats/covers/{id}.jpg exists */}
-      {image && imgOk ? (
-        // eslint-disable-next-line @next/next/no-img-element
-        <img
-          src={image}
-          alt=""
-          aria-hidden
-          draggable={false}
-          onError={() => setImgOk(false)}
-          className="absolute inset-0 h-full w-full object-cover"
-        />
-      ) : (
+      {hasImage ? (
         <>
-          {/* Orb A — primary mood light */}
-          <div
+          {/* Blurred back layer — atmosphere behind the sharp image */}
+          <motion.div
             aria-hidden
-            className="absolute -inset-[8%]"
+            className="absolute inset-0"
             style={{
-              background: `radial-gradient(circle at ${orbAPos}, ${orbA}, transparent 55%)`,
-              filter: "blur(32px)",
+              x: parallaxX,
+              y: parallaxY,
+              scale: 1.1,
+              opacity: 0.4,
+              filter: "blur(40px)",
+              willChange: "transform",
             }}
-          />
-          {/* Orb B — counter weight */}
-          <div
+          >
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={image}
+              alt=""
+              aria-hidden
+              draggable={false}
+              onError={() => setImgOk(false)}
+              className="h-full w-full object-cover"
+            />
+          </motion.div>
+
+          {/* Sharp foreground layer — slow Ken Burns, parallax-reactive */}
+          <motion.div
             aria-hidden
-            className="absolute -inset-[8%] opacity-90"
-            style={{
-              background: `radial-gradient(circle at ${orbBPos}, ${orbB}, transparent 58%)`,
-              filter: "blur(44px)",
-            }}
-          />
-          {/* Highlight line — a single faint diagonal, editorial touch */}
-          <div
-            aria-hidden
-            className="absolute inset-0 opacity-[0.08]"
-            style={{
-              background:
-                "linear-gradient(115deg, transparent 40%, rgba(255,255,255,0.9) 50%, transparent 60%)",
-              mixBlendMode: "overlay",
-            }}
-          />
+            className="absolute inset-0"
+            style={{ x: parallaxX, y: parallaxY, willChange: "transform" }}
+          >
+            <motion.div
+              className="absolute inset-0"
+              initial={{ scale: 1.0 }}
+              animate={{ scale: 1.04 }}
+              transition={{
+                duration: 30,
+                repeat: Infinity,
+                repeatType: "reverse",
+                ease: [0.45, 0, 0.55, 1],
+              }}
+            >
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={image}
+                alt=""
+                aria-hidden
+                draggable={false}
+                onError={() => setImgOk(false)}
+                className="h-full w-full object-cover"
+              />
+            </motion.div>
+          </motion.div>
         </>
+      ) : (
+        <motion.div
+          aria-hidden
+          className="absolute inset-0"
+          style={{ x: parallaxX, y: parallaxY, willChange: "transform" }}
+        >
+          {/* Same Ken Burns language over the generative stack, so both
+              variants breathe in the same way */}
+          <motion.div
+            className="absolute inset-0"
+            initial={{ scale: 1.0 }}
+            animate={{ scale: 1.04 }}
+            transition={{
+              duration: 30,
+              repeat: Infinity,
+              repeatType: "reverse",
+              ease: [0.45, 0, 0.55, 1],
+            }}
+          >
+            {/* Orb A — primary mood light */}
+            <div
+              className="absolute -inset-[8%]"
+              style={{
+                background: `radial-gradient(circle at ${orbAPos}, ${orbA}, transparent 55%)`,
+                filter: "blur(32px)",
+              }}
+            />
+            {/* Orb B — counter weight */}
+            <div
+              className="absolute -inset-[8%] opacity-90"
+              style={{
+                background: `radial-gradient(circle at ${orbBPos}, ${orbB}, transparent 58%)`,
+                filter: "blur(44px)",
+              }}
+            />
+            {/* Highlight line — a single faint diagonal, editorial touch */}
+            <div
+              className="absolute inset-0 opacity-[0.08]"
+              style={{
+                background:
+                  "linear-gradient(115deg, transparent 40%, rgba(255,255,255,0.9) 50%, transparent 60%)",
+                mixBlendMode: "overlay",
+              }}
+            />
+          </motion.div>
+        </motion.div>
       )}
 
-      {/* Film grain — always on, even over real photography */}
-      <div
+      {/* Animated film grain — slow drift of the noise tile gives the
+          artwork a living, photographed-under-warm-light quality */}
+      <motion.div
         aria-hidden
         className="pointer-events-none absolute inset-0 opacity-[0.12] mix-blend-overlay"
         style={{
@@ -96,15 +171,34 @@ export default function CoverStill({ beat, image, aspect = "portrait" }) {
             "url(\"data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='240' height='240'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 0.55 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>\")",
           backgroundSize: "240px 240px",
         }}
+        animate={{
+          backgroundPosition: ["0px 0px", "240px 120px", "0px 0px"],
+        }}
+        transition={{
+          duration: 8,
+          repeat: Infinity,
+          ease: "linear",
+        }}
       />
 
-      {/* Vignette */}
+      {/* Vignette — pulls the eye to the center */}
       <div
         aria-hidden
         className="pointer-events-none absolute inset-0"
         style={{
           background:
             "radial-gradient(ellipse 75% 65% at 50% 50%, transparent 0%, transparent 55%, rgba(0,0,0,0.55) 100%)",
+        }}
+      />
+
+      {/* Strengthened bottom fade — makes the title/metadata beneath the
+          image read cleanly, even over warm or bright artwork */}
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-x-0 bottom-0 h-1/2"
+        style={{
+          background:
+            "linear-gradient(180deg, rgba(0,0,0,0) 0%, rgba(0,0,0,0.25) 45%, rgba(0,0,0,0.7) 100%)",
         }}
       />
 
@@ -152,3 +246,6 @@ export default function CoverStill({ beat, image, aspect = "portrait" }) {
     </div>
   );
 }
+
+// Silk curve kept on export to match the rest of the file family.
+export { EASE_SILK };

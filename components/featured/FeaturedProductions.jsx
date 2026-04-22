@@ -9,15 +9,26 @@ const EASE_SILK = [0.22, 1, 0.36, 1];
 
 const FEATURED_SLUGS = ["tarde-de-lluvia", "cristal", "no-me-llames"];
 
+// Editorial horizontal alignment per card — left, center, right.
+// On mobile we collapse to a single column with a generous 12vh gap.
+const ALIGN_CLASSES = [
+  "md:mr-auto md:ml-0",      // card 1 — left
+  "md:mx-auto md:mt-40",     // card 2 — center, pushed down
+  "md:ml-auto md:mr-0 md:mt-24", // card 3 — right, pushed down less
+];
+
 /**
  * Three hand-picked productions for the homepage. Pulls straight from
  * config/beats.js by slug so the catalogue stays the source of truth —
  * editing a beat's mood/key/BPM there updates here automatically.
  *
- * Visual language matches /beats: editorial serif title, section ruler,
- * the same ProductionCard. We turn on `showLicenseCta` so each card reads
- * like a storefront moment on this page, while /beats keeps its hover-only
- * reveal for a more gallery feel.
+ * Layout is deliberately editorial: not a three-up row but a drifting
+ * left → center → right stack that gives each release its own moment.
+ * Cards stagger in with title-first rhythm (title appears first, then
+ * the three cards cascade with 200ms delays).
+ *
+ * `showLicenseCta` is on so each card reads like a storefront moment
+ * here, while /beats keeps its hover-only reveal for a gallery feel.
  */
 export default function FeaturedProductions() {
   const featured = FEATURED_SLUGS
@@ -30,10 +41,12 @@ export default function FeaturedProductions() {
     return i >= 0 ? String(i + 1).padStart(3, "0") : "000";
   };
 
+  const viewport = { once: true, margin: "-20% 0px" };
+
   return (
     <section
       aria-label="Featured Productions"
-      className="relative w-full overflow-hidden bg-stage text-bone"
+      className="relative w-full overflow-hidden bg-[#0B0B0B] text-bone"
     >
       {/* Film grain — same language as the rest of the site */}
       <div
@@ -51,7 +64,7 @@ export default function FeaturedProductions() {
         <motion.div
           initial={{ opacity: 0 }}
           whileInView={{ opacity: 1 }}
-          viewport={{ once: true, margin: "-10%" }}
+          viewport={viewport}
           transition={{ duration: 1.4, ease: EASE_SILK }}
           className="flex items-center justify-center gap-5 sm:gap-6"
         >
@@ -65,16 +78,16 @@ export default function FeaturedProductions() {
           <span className="h-px w-10 bg-silver/25" aria-hidden />
         </motion.div>
 
-        {/* Section title — editorial serif, same scale family as /beats */}
+        {/* Section title — editorial serif, fades in first */}
         <motion.div
           initial={{ opacity: 0, y: 10 }}
           whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: "-10%" }}
+          viewport={viewport}
           transition={{ duration: 1.4, delay: 0.1, ease: EASE_SILK }}
           className="mt-8 flex flex-col items-center text-center sm:mt-10"
         >
           <h2
-            className="font-display text-[1.75rem] leading-[1.1] text-bone sm:text-[2.15rem]"
+            className="font-display text-[1.9rem] leading-[1.1] text-bone sm:text-[2.35rem]"
             style={{ letterSpacing: "-0.012em" }}
           >
             Featured Productions
@@ -88,29 +101,39 @@ export default function FeaturedProductions() {
           </p>
         </motion.div>
 
-        {/* Grid — three up on desktop, stacks on mobile. The asymmetric
-            offsets built into ProductionCard give the row a subtle rhythm
-            without it feeling algorithmic. */}
+        {/* Cards — single column with 12vh vertical gap on mobile;
+            on desktop each card aligns left / center / right for an
+            editorial drifting rhythm, and staggers in with 200ms delays
+            after the title has settled. Max-width per card keeps each
+            release reading as its own moment. */}
         <motion.div
           initial="hidden"
           whileInView="visible"
-          viewport={{ once: true, margin: "-10%" }}
+          viewport={viewport}
           variants={{
             hidden: {},
             visible: {
-              transition: { staggerChildren: 0.22, delayChildren: 0.25 },
+              transition: { staggerChildren: 0.2, delayChildren: 0.55 },
             },
           }}
-          className="mt-20 grid grid-cols-1 gap-x-10 gap-y-24 sm:mt-24 sm:gap-y-28 md:grid-cols-3 md:gap-x-10 lg:gap-x-14"
+          className="mt-24 flex flex-col gap-[12vh] sm:mt-28 md:block md:gap-0"
         >
           {featured.map((beat, i) => (
-            <ProductionCard
+            <div
               key={beat.id}
-              beat={beat}
-              index={i}
-              releaseNo={releaseNoFor(beat.id)}
-              showLicenseCta
-            />
+              className={[
+                "w-full md:max-w-[420px] lg:max-w-[460px]",
+                ALIGN_CLASSES[i] || "",
+              ].join(" ")}
+            >
+              <ProductionCard
+                beat={beat}
+                index={i}
+                releaseNo={releaseNoFor(beat.id)}
+                showLicenseCta
+                disableOffset
+              />
+            </div>
           ))}
         </motion.div>
 
@@ -118,9 +141,9 @@ export default function FeaturedProductions() {
         <motion.div
           initial={{ opacity: 0 }}
           whileInView={{ opacity: 1 }}
-          viewport={{ once: true, margin: "-10%" }}
+          viewport={viewport}
           transition={{ duration: 1.4, delay: 0.2, ease: EASE_SILK }}
-          className="mt-24 flex items-center justify-center gap-5 sm:mt-28 sm:gap-6"
+          className="mt-24 flex items-center justify-center gap-5 sm:mt-32 sm:gap-6"
         >
           <span className="h-px w-10 bg-silver/25" aria-hidden />
           <a

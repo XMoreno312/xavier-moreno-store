@@ -1,15 +1,18 @@
 "use client";
 
+import { useRef } from "react";
 import Link from "next/link";
-import { motion } from "framer-motion";
+import { motion, useMotionValue, useSpring, useTransform } from "framer-motion";
 import { useAudioPlayer } from "../AudioPlayerProvider";
 import CoverStill from "./CoverStill";
 
 // Single cinematic curve — landing → masthead → cards all share this.
-const EASE_SILK = [0.22, 0.6, 0.24, 1];
+const EASE_SILK = [0.22, 1, 0.36, 1];
 
 // Composed offsets — not an alternating pattern. The rhythm has variation,
-// so the grid reads as intentionally laid-out rather than algorithmic.
+// so the /beats 2-col grid reads as intentionally laid-out rather than
+// algorithmic. FeaturedProductions passes `disableOffset` so it can use
+// its own editorial layout without inheriting this vertical stagger.
 const OFFSETS = ["md:mt-0", "md:mt-28", "md:mt-8", "md:mt-32", "md:mt-4"];
 
 function PlayGlyph({ playing }) {
@@ -26,22 +29,60 @@ function PlayGlyph({ playing }) {
 }
 
 /**
- * A release — not a product line item. No price. No "add to cart".
- * Clicking anywhere on the title/card routes to /beats/[id] where
- * licensing is surfaced. The little play button on the cover is the
- * only transactional affordance on this page, and it's a preview only.
+ * A release — not a product line item. No price, no "add to cart".
+ * Clicking the title/card routes to /beats/[id] where licensing is
+ * surfaced. The centered play pill is the only transactional affordance
+ * and it's a preview only.
+ *
+ * Interaction: a gentle mouse-follow parallax (±6px, spring-smoothed) on
+ * the cover; a quiet scale + bone-tinted glow on hover; the border
+ * warms from bone/10 to bone/30; the play pill lifts and glows; the
+ * italic mood line lifts from 0.75 → 1.0 opacity. Everything sits on the
+ * same silk curve as the rest of the site.
  */
-export default function ProductionCard({ beat, index = 0, releaseNo, showLicenseCta = false }) {
+export default function ProductionCard({
+  beat,
+  index = 0,
+  releaseNo,
+  showLicenseCta = false,
+  disableOffset = false,
+}) {
   const { currentBeat, isPlaying, playBeat } = useAudioPlayer();
   const isCurrent = currentBeat?.id === beat.id;
   const playingThis = isCurrent && isPlaying;
 
-  const offsetClass = OFFSETS[index % OFFSETS.length];
+  const offsetClass = disableOffset ? "" : OFFSETS[index % OFFSETS.length];
 
   const handlePreview = (e) => {
     e.preventDefault();
     e.stopPropagation();
     playBeat(beat);
+  };
+
+  // Mouse parallax — raw motion values driven by pointer, springed for
+  // smoothness. Max drift is ~6px on each axis.
+  const coverRef = useRef(null);
+  const mx = useMotionValue(0);
+  const my = useMotionValue(0);
+  const springConfig = { stiffness: 80, damping: 20, mass: 0.6 };
+  const sx = useSpring(mx, springConfig);
+  const sy = useSpring(my, springConfig);
+  const parallaxX = useTransform(sx, [-0.5, 0.5], [-6, 6]);
+  const parallaxY = useTransform(sy, [-0.5, 0.5], [-6, 6]);
+
+  const handleMouseMove = (e) => {
+    const el = coverRef.current;
+    if (!el) return;
+    const rect = el.getBoundingClientRect();
+    const nx = (e.clientX - rect.left) / rect.width - 0.5;
+    const ny = (e.clientY - rect.top) / rect.height - 0.5;
+    mx.set(nx);
+    my.set(ny);
+  };
+
+  const handleMouseLeave = () => {
+    mx.set(0);
+    my.set(0);
   };
 
   return (
@@ -58,36 +99,44 @@ export default function ProductionCard({ beat, index = 0, releaseNo, showLicense
         aria-label={`${beat.title} — ${beat.genre} production in ${beat.key}`}
         className="block focus:outline-none focus-visible:ring-1 focus-visible:ring-silver/60"
       >
-        {/* Cover — generative still, picks up public/beats/covers/{id}.jpg when present */}
+        {/* Cover wrapper — hosts the parallax listener, the hover scale,
+            and the bone-tinted glow */}
         <motion.div
-          className="relative"
-          whileHover={{ scale: 1.008 }}
-          transition={{ duration: 1.4, ease: EASE_SILK }}
+          ref={coverRef}
+          onMouseMove={handleMouseMove}
+          onMouseLeave={handleMouseLeave}
+          className="relative overflow-hidden border border-bone/10 transition-[border-color,box-shadow] duration-[900ms] group-hover:border-bone/30 group-hover:shadow-[0_0_60px_rgba(239,233,221,0.08)]"
+          style={{ transitionTimingFunction: "cubic-bezier(0.22, 1, 0.36, 1)" }}
+          whileHover={{ scale: 1.015 }}
+          transition={{ duration: 1.2, ease: EASE_SILK }}
         >
           <CoverStill
             beat={beat}
             image={`/beats/covers/${beat.id}.jpg`}
             aspect="portrait"
+            parallaxX={parallaxX}
+            parallaxY={parallaxY}
           />
 
           {/* Soft overlay — fades in on hover before the CTA appears */}
           <div
             aria-hidden
             className="pointer-events-none absolute inset-0 bg-black/0 opacity-0 transition-opacity duration-[800ms] group-hover:bg-black/15 group-hover:opacity-100"
-            style={{ transitionTimingFunction: "cubic-bezier(0.22, 0.6, 0.24, 1)" }}
+            style={{ transitionTimingFunction: "cubic-bezier(0.22, 1, 0.36, 1)" }}
           />
 
-          {/* Preview play — center, appears on hover, deliberate fade */}
+          {/* Preview play — center, emphasized on hover: lifts in, scales
+              from 1 → 1.1, and picks up a bone-tinted glow */}
           <button
             onClick={handlePreview}
             aria-label={playingThis ? `Pause preview of ${beat.title}` : `Preview ${beat.title}`}
             className={[
-              "absolute left-1/2 top-1/2 z-10 flex -translate-x-1/2 -translate-y-1/2 items-center gap-2 rounded-full border border-bone/25 bg-black/40 px-4 py-2 text-[10px] uppercase tracking-[0.3em] text-bone/85 backdrop-blur-md transition-opacity duration-[800ms]",
+              "absolute left-1/2 top-1/2 z-10 flex -translate-x-1/2 -translate-y-1/2 items-center gap-2 rounded-full border border-bone/30 bg-black/45 px-5 py-2.5 text-[10px] uppercase tracking-[0.32em] text-bone backdrop-blur-md transition-[opacity,transform,box-shadow,background-color,border-color] duration-[700ms] will-change-transform",
               playingThis
-                ? "opacity-100"
-                : "opacity-0 group-hover:opacity-100 focus:opacity-100",
+                ? "opacity-100 scale-110 bg-black/55 border-bone/50 shadow-[0_0_40px_rgba(239,233,221,0.18)]"
+                : "opacity-0 scale-100 group-hover:opacity-100 group-hover:scale-110 group-hover:shadow-[0_0_40px_rgba(239,233,221,0.18)] focus:opacity-100 focus:scale-110",
             ].join(" ")}
-            style={{ transitionTimingFunction: "cubic-bezier(0.22, 0.6, 0.24, 1)" }}
+            style={{ transitionTimingFunction: "cubic-bezier(0.22, 1, 0.36, 1)" }}
           >
             <PlayGlyph playing={playingThis} />
             <span>{playingThis ? "Pause" : "Preview"}</span>
@@ -137,17 +186,22 @@ export default function ProductionCard({ beat, index = 0, releaseNo, showLicense
             {beat.title}
           </h3>
 
-          {/* Mood line — plays second fiddle: smaller, lighter, italic */}
+          {/* Mood line — italic serif, lifts from 0.75 → 1.0 on hover */}
           {beat.mood ? (
             <p
-              className="mt-5 max-w-md text-[12.5px] leading-[1.65] text-bone/45 sm:text-[13px]"
-              style={{ fontStyle: "italic", letterSpacing: "0.005em" }}
+              className="font-display mt-5 max-w-md text-[13px] leading-[1.65] text-bone/75 transition-opacity duration-[800ms] group-hover:text-bone group-hover:opacity-100 sm:text-[13.5px]"
+              style={{
+                fontStyle: "italic",
+                letterSpacing: "0.005em",
+                opacity: 0.75,
+                transitionTimingFunction: "cubic-bezier(0.22, 1, 0.36, 1)",
+              }}
             >
               {beat.mood}
             </p>
           ) : null}
 
-          {/* Metadata row — even more subdued, thinner divider, smaller type */}
+          {/* Metadata row — thinner divider, smaller type */}
           <div className="mt-7 flex items-center gap-3 text-[9.5px] text-silver/65">
             <span style={{ letterSpacing: "0.34em", textTransform: "uppercase" }}>
               {beat.key}
@@ -158,8 +212,9 @@ export default function ProductionCard({ beat, index = 0, releaseNo, showLicense
             </span>
           </div>
 
-          {/* Quiet CTA — always visible on the homepage variant, hover-only
-              in the full catalogue so the /beats grid still breathes. */}
+          {/* Quiet CTA — always visible on the homepage featured variant,
+              hover-only in the full /beats catalogue so that page can
+              breathe more as a gallery. */}
           <div className="mt-7 h-4">
             <span
               className={[
@@ -171,7 +226,7 @@ export default function ProductionCard({ beat, index = 0, releaseNo, showLicense
               style={{
                 letterSpacing: "0.32em",
                 textTransform: "uppercase",
-                transitionTimingFunction: "cubic-bezier(0.22, 0.6, 0.24, 1)",
+                transitionTimingFunction: "cubic-bezier(0.22, 1, 0.36, 1)",
               }}
             >
               License This Production
