@@ -6,6 +6,7 @@ import BeatsMasthead from "@/components/beats/BeatsMasthead";
 import ProductionCard from "@/components/beats/ProductionCard";
 import FilterChips from "@/components/beats/FilterChips";
 import { beats, GENRES } from "@/config/beats";
+import NewsletterBand from "@/components/newsletter/NewsletterBand";
 
 // Same ease as the landing / masthead — a single cinematic vocabulary.
 const EASE_SILK = [0.22, 0.6, 0.24, 1];
@@ -122,7 +123,14 @@ export default function BeatsPage() {
           </motion.div>
         )}
 
+      </section>
+
+      {/* Newsletter — quiet editorial capture below the grid */}
+      <NewsletterBand />
+
+      <section className="mx-auto max-w-6xl px-6 sm:px-8">
         {/* Quiet closing rule */}
+
         <div className="mt-44 flex items-center justify-center gap-6 pb-14 sm:mt-56 sm:pb-20">
           <span className="h-px w-16 bg-silver/25" aria-hidden />
           <span
@@ -133,7 +141,7 @@ export default function BeatsPage() {
           </span>
           <span className="h-px w-16 bg-silver/25" aria-hidden />
         </div>
-      </section>
+            </section>
     </div>
   );
 }

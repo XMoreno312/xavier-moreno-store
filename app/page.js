@@ -2,6 +2,7 @@ import Hero from "@/components/hero/Hero";
 import FeaturedProductions from "@/components/featured/FeaturedProductions";
 import AtmosphericBio from "@/components/portrait/AtmosphericBio";
 import QuietMoment from "@/components/portrait/QuietMoment";
+import NewsletterBand from "@/components/newsletter/NewsletterBand";
 import SectionReveal from "@/components/SectionReveal";
 
 export const metadata = {
@@ -22,6 +23,9 @@ export default function HomePage() {
       </SectionReveal>
       <SectionReveal>
         <QuietMoment />
+      </SectionReveal>
+      <SectionReveal>
+        <NewsletterBand />
       </SectionReveal>
     </>
   );
