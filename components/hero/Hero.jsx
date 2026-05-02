@@ -5,7 +5,7 @@ import { motion } from "framer-motion";
 import { useRouter } from "next/navigation";
 import BackgroundVisual from "./BackgroundVisual";
 import LogoAnimation from "./LogoAnimation";
-import HeroCTA from "./HeroCTA";
+import EnterButton from "./EnterButton";
 
 // Long, restrained easings. Nothing snappy lives here on purpose.
 const EASE_SILK = [0.22, 0.6, 0.24, 1];
@@ -84,32 +84,24 @@ export default function Hero() {
         }}
         className="absolute inset-0"
       >
-        {/* Cinematic background: parallax layers + optional video drop-in */}
+        {/* Cinematic background — warm coffee gradient + floating cutout.
+            BackgroundVisual now owns grain + bottom fade, so we don't
+            stack a duplicate grain or a darkening vignette on top. */}
         <BackgroundVisual />
 
-        {/* Film-grain overlay — very subtle */}
+        {/* Content column.
+            Mobile: centered stack, full width.
+            Desktop: anchored center-LEFT (~30% from left edge) so the
+            cutout portrait on the right has room to breathe. */}
         <div
-          aria-hidden
-          className="pointer-events-none absolute inset-0 opacity-[0.07] mix-blend-overlay"
-          style={{
-            backgroundImage:
-              "url(\"data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='240' height='240'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 0.6 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>\")",
-            backgroundSize: "240px 240px",
-          }}
-        />
-
-        {/* Vignette — pulls the eye center */}
-        <div
-          aria-hidden
-          className="pointer-events-none absolute inset-0"
-          style={{
-            background:
-              "radial-gradient(ellipse 70% 60% at 50% 45%, transparent 0%, transparent 40%, rgba(0,0,0,0.55) 100%)",
-          }}
-        />
-
-        {/* Content column */}
-        <div className="relative z-10 flex h-full flex-col items-center justify-center px-6 text-center">
+          className={[
+            "relative z-10 flex h-full flex-col px-6",
+            // Mobile defaults — center
+            "items-center justify-center text-center",
+            // Desktop — left-aligned column at ~30-40% from left
+            "md:items-start md:pl-[8vw] md:pr-[45vw] md:text-left",
+          ].join(" ")}
+        >
           <LogoAnimation />
 
           <motion.p
@@ -120,34 +112,36 @@ export default function Hero() {
               delay: 2.2,
               ease: EASE_SILK,
             }}
-            className="mt-7 max-w-md text-[10.5px] uppercase text-white/55 sm:mt-9 sm:text-[12px]"
+            className="mt-7 max-w-md text-[10.5px] uppercase text-bone/65 sm:mt-9 sm:text-[12px]"
             style={{
               fontWeight: 200,
-              letterSpacing: "0.42em",
+              letterSpacing: "0.32em",
               lineHeight: 1.8,
             }}
           >
             Productions for artists who feel everything
           </motion.p>
 
-          {/* Tagline — serif, bone, editorial. Pure line. No button chrome,
-              no hover underline. It sits on the page like a dedication. */}
-          <motion.p
-            initial={{ opacity: 0, y: 10 }}
+          <motion.h1
+            initial={{ opacity: 0, y: 8 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 1.6, delay: 3.3, ease: EASE_SILK }}
-            className="mt-12 font-display text-bone sm:mt-14"
+            transition={{
+              duration: 1.8,
+              delay: 2.7,
+              ease: EASE_SILK,
+            }}
+            className="mt-6 font-display italic text-bone sm:mt-8"
             style={{
-              fontSize: "clamp(1.35rem, 2.1vw, 1.9rem)",
+              fontSize: "clamp(1.6rem, 3.4vw, 2.75rem)",
               fontWeight: 400,
-              letterSpacing: "-0.005em",
+              letterSpacing: "-0.01em",
               lineHeight: 1.15,
             }}
           >
             Welcome to my collection.
-          </motion.p>
+          </motion.h1>
 
-          <HeroCTA onExit={handleEnter} disabled={isExiting} delay={3.9} />
+          <EnterButton onClick={handleEnter} delay={3.3} disabled={isExiting} />
         </div>
 
         {/* Ambient audio — muted by default; tasteful unmute toggle */}

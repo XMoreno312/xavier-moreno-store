@@ -6,10 +6,15 @@ const EASE_SILK = [0.22, 0.6, 0.24, 1];
 
 /**
  * Hero CTA — serif, bone, editorial. Not a pill, not uppercase.
- * The period matters. The underline animates in on hover.
+ * The underline animates in on hover.
  * Still fires onClick so the hero can run its exit fade before navigating.
  */
-export default function EnterButton({ onClick, delay = 3, disabled = false }) {
+export default function EnterButton({
+  onClick,
+  delay = 3,
+  disabled = false,
+  label = "License a production",
+}) {
   return (
     <motion.button
       type="button"
@@ -19,23 +24,23 @@ export default function EnterButton({ onClick, delay = 3, disabled = false }) {
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 1.6, delay, ease: EASE_SILK }}
       whileTap={{ scale: 0.992 }}
-      aria-label="Welcome to my collection — enter the beats catalog"
+      aria-label={`${label} — enter the beats catalog`}
       className={[
-        "group relative mt-12 inline-block font-display text-bone",
+        "group relative mt-10 inline-block font-display text-bone",
         "transition-colors duration-[900ms] ease-out",
         "hover:text-white",
         "disabled:cursor-default disabled:opacity-70",
-        "sm:mt-14",
+        "sm:mt-12",
       ].join(" ")}
       style={{
-        fontSize: "clamp(1.35rem, 2.1vw, 1.9rem)",
+        fontSize: "clamp(1.15rem, 1.6vw, 1.55rem)",
         fontWeight: 400,
         letterSpacing: "-0.005em",
         lineHeight: 1.15,
       }}
     >
       <span className="relative inline-block">
-        Welcome to my collection.
+        {label}
         {/* Hairline underline — grows in on hover, stays in our palette */}
         <span
           aria-hidden
