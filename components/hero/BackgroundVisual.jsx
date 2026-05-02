@@ -52,7 +52,7 @@ export default function BackgroundVisual() {
           fill
           priority
           sizes="100vw"
-          className="object-cover object-[65%_center] md:object-[72%_center]"
+          className="object-cover object-[65%_center] md:scale-[1.4] md:origin-[30%_25%] md:object-[30%_25%]"
           style={{
             // Warm color photo — nudge saturation down, add shadow warmth.
             filter: "sepia(0.08) saturate(0.9) contrast(1.02)",
