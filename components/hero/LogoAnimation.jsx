@@ -36,14 +36,13 @@ export default function LogoAnimation() {
 
       {/* Canonical crown + wordmark lockup — same mark the Header uses.
           `blendOnBg` drops the PNG's black backing so only the brush strokes
-          and crown render on the cinematic #0B0B0B stage. Mobile size is
-          slightly smaller so the lockup never crowds the face cutout. */}
+          and crown render on the cinematic #0B0B0B stage. */}
       <Logo
         blendOnBg
         className="block h-auto w-auto select-none"
         style={{
           // Smooth cinematic scale from mobile → desktop without breakpoint jumps.
-          height: "clamp(5.5rem, 20vw, 15rem)",
+          height: "clamp(7rem, 24vw, 15rem)",
         }}
       />
     </motion.div>
