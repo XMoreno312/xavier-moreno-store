@@ -90,16 +90,16 @@ export default function Hero() {
         <BackgroundVisual />
 
         {/* Content column.
-            Mobile: centered stack, full width.
-            Desktop: anchored center-LEFT (~30% from left edge) so the
-            cutout portrait on the right has room to breathe. */}
+            Mobile: top-left aligned, pulled down from the face zone.
+            Desktop: vertically centered, anchored ~30-40% from left
+            so the cutout has room to breathe on the right. */}
         <div
           className={[
             "relative z-10 flex h-full flex-col px-6",
-            // Mobile defaults — center
-            "items-center justify-center text-center",
-            // Desktop — left-aligned column at ~30-40% from left
-            "md:items-start md:pl-[8vw] md:pr-[45vw] md:text-left",
+            // Mobile — top-left, breathing room from the face above
+            "items-start justify-start pt-[6vh] text-left",
+            // Desktop — left column at ~30-40% from left, vertically centered
+            "md:items-start md:justify-center md:pl-[8vw] md:pr-[52vw] md:pt-0 md:text-left",
           ].join(" ")}
         >
           <LogoAnimation />
@@ -112,7 +112,7 @@ export default function Hero() {
               delay: 2.2,
               ease: EASE_SILK,
             }}
-            className="mt-7 max-w-md text-[10.5px] uppercase text-bone/65 sm:mt-9 sm:text-[12px]"
+            className="mt-8 max-w-md text-[10.5px] uppercase text-bone/65 sm:mt-10 sm:text-[12px]"
             style={{
               fontWeight: 200,
               letterSpacing: "0.32em",
@@ -130,7 +130,7 @@ export default function Hero() {
               delay: 2.7,
               ease: EASE_SILK,
             }}
-            className="mt-6 font-display italic text-bone sm:mt-8"
+            className="mt-7 font-display italic text-bone sm:mt-9"
             style={{
               fontSize: "clamp(1.6rem, 3.4vw, 2.75rem)",
               fontWeight: 400,

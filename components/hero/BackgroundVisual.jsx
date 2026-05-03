@@ -12,9 +12,12 @@ const DRIFT_EASE = [0.45, 0, 0.55, 1];
  * Layer stack (back → front):
  *   0. Linear ink wash (135°, deep coffee → near-black)
  *   1. Warm radial bloom anchored upper-left to give the type a halo
- *   2. Cutout portrait anchored to the right edge with a slow Ken Burns drift
+ *   2a. Dark brown halo behind the cutout — anchors it to the gradient
+ *   2b. Cutout portrait — desktop, larger and pulled inward
+ *   2c. Cutout portrait — mobile, face anchored upper-right
+ *   2d. Mobile read-zone gradient — keeps text legible over the cutout
  *   3. Site-wide film grain at ~5% opacity
- *   4. Bottom 20vh fade to #0B0B0B so FeaturedProductions hands off cleanly
+ *   4. Bottom fade to #0B0B0B so FeaturedProductions hands off cleanly
  */
 export default function BackgroundVisual() {
   return (
@@ -39,8 +42,25 @@ export default function BackgroundVisual() {
         }}
       />
 
-      {/* 2. Cutout portrait — right edge on desktop, atmospheric on mobile.
-            Slow Ken Burns (1.0 → 1.02) over 30s for almost-imperceptible breath. */}
+      {/* 2a. Dark brown halo BEHIND the desktop cutout — soft radial,
+            ~80% the cutout's footprint, blurred ~120px. Sits between
+            the gradient and the cutout itself so the figure reads as
+            "lit from the gradient" rather than pasted on top. */}
+      <div
+        aria-hidden
+        className="pointer-events-none absolute bottom-[-4vh] right-[2vw] hidden h-[95vh] w-[65vh] md:block"
+        style={{
+          background:
+            "radial-gradient(ellipse 60% 55% at 50% 55%, #150F08 0%, transparent 75%)",
+          opacity: 0.6,
+          filter: "blur(120px)",
+        }}
+      />
+
+      {/* 2b. Cutout portrait — desktop. Larger, pulled inward so the
+            guitar body sits roughly between 50–65% of the viewport.
+            Slow Ken Burns (1.0 → 1.02) over 30s for almost-imperceptible
+            breath. */}
       <motion.div
         aria-hidden
         initial={{ scale: 1.0 }}
@@ -51,10 +71,10 @@ export default function BackgroundVisual() {
           repeatType: "reverse",
           ease: DRIFT_EASE,
         }}
-        className="pointer-events-none absolute bottom-0 right-[-4vw] hidden h-[85vh] md:block"
+        className="pointer-events-none absolute bottom-[-3vh] right-[6vw] hidden h-[100vh] md:block"
         style={{
           aspectRatio: "1440 / 1800",
-          filter: "drop-shadow(0 40px 80px rgba(0,0,0,0.5))",
+          filter: "drop-shadow(0 60px 100px rgba(0,0,0,0.6))",
         }}
       >
         <Image
@@ -63,15 +83,17 @@ export default function BackgroundVisual() {
           aria-hidden
           fill
           priority
-          sizes="(min-width: 768px) 70vh, 0px"
+          sizes="(min-width: 768px) 80vh, 0px"
           className="object-contain object-bottom"
         />
       </motion.div>
 
-      {/* 2b. Mobile cutout — low-opacity atmospheric layer behind the text */}
+      {/* 2c. Mobile cutout — face/upper-body visible at top-right.
+            objectPosition crops to the head/shoulders area; full opacity,
+            with the read-zone gradient (2d) handling legibility. */}
       <div
         aria-hidden
-        className="pointer-events-none absolute bottom-0 right-[-10vw] block h-[70vh] opacity-[0.30] md:hidden"
+        className="pointer-events-none absolute top-[-4vh] right-[-14vw] block h-[58vh] md:hidden"
         style={{
           aspectRatio: "1440 / 1800",
         }}
@@ -82,9 +104,22 @@ export default function BackgroundVisual() {
           aria-hidden
           fill
           sizes="(max-width: 767px) 90vw, 0px"
-          className="object-contain object-bottom"
+          className="object-contain"
+          style={{ objectPosition: "75% 20%" }}
         />
       </div>
+
+      {/* 2d. Mobile read-zone gradient — fades the cutout into the
+            background over the lower half so logo/tagline/headline/CTA
+            sit cleanly over a dark wash. */}
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-0 block md:hidden"
+        style={{
+          background:
+            "linear-gradient(to bottom, transparent 0%, transparent 32%, rgba(11,11,11,0.78) 58%, #0B0B0B 92%)",
+        }}
+      />
 
       {/* 3. Site-wide film grain — keeps the gradient from looking flat/CGI */}
       <div
