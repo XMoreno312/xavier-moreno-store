@@ -1,8 +1,7 @@
-// TODO: wire to ConvertKit/Beehiiv when service is chosen
 "use client";
 
-import { useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { useEffect } from "react";
+import { motion } from "framer-motion";
 
 // Canonical easing used throughout the site.
 const EASE_SILK = [0.22, 1, 0.36, 1];
@@ -11,21 +10,40 @@ const VIEWPORT = { once: true, margin: "-20% 0px" };
 
 /**
  * Subtle email capture band. Reads as an editorial moment, not a growth
- * widget: small italic eyebrow, muted silver subtitle, and a single-line
- * email + arrow on desktop (stacked on mobile). No badges, no promises of
- * "weekly newsletter" — just "Enter the archive."
- *
- * On submit we fade out the form and drop in a quiet italic "You're in."
- * The network call is intentionally not wired up yet; see top-of-file TODO.
+ * widget: small italic eyebrow, muted silver subtitle, then a Tally-backed
+ * email field. We keep the React-side eyebrow + subtitle for visual control
+ * (typography, animation, spacing) and let Tally render only the input +
+ * submit button via the hideTitle=1 flag on the embed URL. Tally also owns
+ * the post-submission "You're in." state inside the iframe — that thank-you
+ * page was configured on the form itself, so the React success state has
+ * been removed.
  */
-export default function NewsletterBand() {
-  const [submitted, setSubmitted] = useState(false);
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    // No network call yet — placeholder. See top-of-file TODO.
-    setSubmitted(true);
-  };
+const TALLY_SRC =
+  "https://tally.so/embed/oblLvx?alignLeft=1&hideTitle=1&transparentBackground=1&dynamicHeight=1";
+
+export default function NewsletterBand() {
+  useEffect(() => {
+    // Load Tally's embed script for dynamic-height postMessage support.
+    // Safe to run on multiple pages — script is deduped by src.
+    const SRC = "https://tally.so/widgets/embed.js";
+    const existing = document.querySelector(`script[src="${SRC}"]`);
+    if (existing) {
+      if (typeof window.Tally !== "undefined") {
+        window.Tally.loadEmbeds();
+      }
+      return;
+    }
+    const s = document.createElement("script");
+    s.src = SRC;
+    s.async = true;
+    s.onload = () => {
+      if (typeof window.Tally !== "undefined") {
+        window.Tally.loadEmbeds();
+      }
+    };
+    document.body.appendChild(s);
+  }, []);
 
   return (
     <section
@@ -78,82 +96,13 @@ export default function NewsletterBand() {
         </p>
 
         <div className="mt-10 w-full">
-          <AnimatePresence mode="wait" initial={false}>
-            {submitted ? (
-              <motion.p
-                key="confirm"
-                initial={{ opacity: 0, y: 6 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0 }}
-                transition={{ duration: 0.8, ease: EASE_SILK }}
-                className="font-display italic text-bone"
-                style={{
-                  fontSize: "clamp(1.15rem, 1.7vw, 1.4rem)",
-                  fontWeight: 400,
-                  letterSpacing: "-0.005em",
-                  lineHeight: 1.2,
-                }}
-              >
-                You&apos;re in.
-              </motion.p>
-            ) : (
-              <motion.form
-                key="form"
-                onSubmit={handleSubmit}
-                initial={{ opacity: 1 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                transition={{ duration: 0.6, ease: EASE_SILK }}
-                className="mx-auto flex max-w-[420px] flex-col items-stretch gap-4 sm:flex-row sm:items-end sm:gap-5"
-                aria-label="Email subscription"
-              >
-                <label htmlFor="nl-email" className="sr-only">
-                  Email address
-                </label>
-                <input
-                  id="nl-email"
-                  name="email"
-                  type="email"
-                  required
-                  autoComplete="email"
-                  placeholder="email address"
-                  className={[
-                    "block w-full border-0 border-b border-bone/20 bg-transparent",
-                    "px-0 py-2.5 text-[15px] text-bone placeholder:text-silver/70",
-                    "transition-colors duration-500 ease-out",
-                    "focus:border-bone/60 focus:outline-none focus:ring-0",
-                    "appearance-none rounded-none text-center sm:text-left",
-                  ].join(" ")}
-                />
-                <button
-                  type="submit"
-                  aria-label="Subscribe"
-                  className={[
-                    "group relative inline-flex shrink-0 items-center justify-center",
-                    "px-5 py-2.5 text-[13px] text-bone/90",
-                    "border border-bone/20 bg-transparent",
-                    "transition-all duration-[700ms] ease-out",
-                    "hover:text-bone hover:border-bone/45",
-                  ].join(" ")}
-                  style={{
-                    letterSpacing: "0.18em",
-                    fontWeight: 300,
-                    boxShadow: "0 0 0 rgba(239,233,221,0)",
-                  }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.boxShadow =
-                      "0 0 24px rgba(239,233,221,0.1)";
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.boxShadow =
-                      "0 0 0 rgba(239,233,221,0)";
-                  }}
-                >
-                  →
-                </button>
-              </motion.form>
-            )}
-          </AnimatePresence>
+          <iframe
+            data-tally-src={TALLY_SRC}
+            loading="lazy"
+            title="Newsletter signup"
+            className="mx-auto block w-full min-h-[120px] max-w-md"
+            style={{ border: 0, width: "100%" }}
+          />
         </div>
       </motion.div>
     </section>
