@@ -34,11 +34,8 @@ export default function LogoAnimation() {
         }}
       />
 
-      {/* Canonical crown + wordmark lockup — same mark the Header uses.
-          `blendOnBg` drops the PNG's black backing so only the brush strokes
-          and crown render on the cinematic #0B0B0B stage. */}
+      {/* Canonical crown + wordmark lockup — same mark the Header uses. */}
       <Logo
-        blendOnBg
         className="block h-auto w-auto select-none"
         style={{
           // Smooth cinematic scale from mobile → desktop without breakpoint jumps.

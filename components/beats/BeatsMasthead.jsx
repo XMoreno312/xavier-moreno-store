@@ -177,7 +177,6 @@ export default function BeatsMasthead() {
             }}
           />
           <Logo
-            blendOnBg
             className="block h-auto w-auto select-none"
             style={{
               // Smaller than the hero — it's a masthead, not the main stage —

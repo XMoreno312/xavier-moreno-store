@@ -6,7 +6,6 @@
 export default function Logo({
   className = "",
   alt = "Xavier Moreno",
-  blendOnBg = false,
   style,
 }) {
   return (
@@ -16,13 +15,7 @@ export default function Logo({
       alt={alt}
       draggable={false}
       className={className}
-      style={{
-        // `screen` blends the logo's black bg away so the lockup reads
-        // cleanly on any surface. Use on the hero (pure #0B0B0B) where
-        // even a subtle bg rectangle would be visible.
-        ...(blendOnBg ? { mixBlendMode: "screen" } : null),
-        ...style,
-      }}
+      style={style}
     />
   );
 }

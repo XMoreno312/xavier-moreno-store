@@ -25,7 +25,7 @@ export default function Header() {
     >
       <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-4 sm:px-8">
         <Link href="/" className="group flex items-center leading-none">
-          <Logo className="h-10 w-auto sm:h-12" blendOnBg />
+          <Logo className="h-10 w-auto sm:h-12" />
         </Link>
 
         <nav
