@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect } from "react";
-import { motion } from "framer-motion";
+import { useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 
 // Canonical easing used throughout the site.
 const EASE_SILK = [0.22, 1, 0.36, 1];
@@ -10,40 +10,43 @@ const VIEWPORT = { once: true, margin: "-20% 0px" };
 
 /**
  * Subtle email capture band. Reads as an editorial moment, not a growth
- * widget: small italic eyebrow, muted silver subtitle, then a Tally-backed
- * email field. We keep the React-side eyebrow + subtitle for visual control
- * (typography, animation, spacing) and let Tally render only the input +
- * submit button via the hideTitle=1 flag on the embed URL. Tally also owns
- * the post-submission "You're in." state inside the iframe — that thank-you
- * page was configured on the form itself, so the React success state has
- * been removed.
+ * widget: small italic eyebrow, muted silver subtitle, then a native email
+ * field and minimal-bone-bordered submit. Submissions POST to /api/subscribe,
+ * which forwards to the Tally form (oblLvx) and falls through to logging /
+ * Resend if Tally rejects the request.
+ *
+ * Replaces the previous Tally iframe embed because the embedded form
+ * rendered placeholder/label text in low-contrast gray that was unreadable
+ * against the dark stage.
  */
-
-const TALLY_SRC =
-  "https://tally.so/embed/oblLvx?alignLeft=1&hideTitle=1&transparentBackground=1&dynamicHeight=1";
-
 export default function NewsletterBand() {
-  useEffect(() => {
-    // Load Tally's embed script for dynamic-height postMessage support.
-    // Safe to run on multiple pages — script is deduped by src.
-    const SRC = "https://tally.so/widgets/embed.js";
-    const existing = document.querySelector(`script[src="${SRC}"]`);
-    if (existing) {
-      if (typeof window.Tally !== "undefined") {
-        window.Tally.loadEmbeds();
-      }
-      return;
+  const [email, setEmail] = useState("");
+  const [status, setStatus] = useState("idle"); // idle | submitting | success | error
+
+  const onSubmit = async (e) => {
+    e.preventDefault();
+    if (status === "submitting") return;
+    if (!email) return;
+    setStatus("submitting");
+    try {
+      const res = await fetch("/api/subscribe", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email }),
+      });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      setStatus("success");
+    } catch (err) {
+      setStatus("error");
     }
-    const s = document.createElement("script");
-    s.src = SRC;
-    s.async = true;
-    s.onload = () => {
-      if (typeof window.Tally !== "undefined") {
-        window.Tally.loadEmbeds();
-      }
-    };
-    document.body.appendChild(s);
-  }, []);
+  };
+
+  const onFocus = (el) => {
+    el.style.borderBottomColor = "rgba(239, 233, 221, 0.6)";
+  };
+  const onBlur = (el) => {
+    el.style.borderBottomColor = "rgba(239, 233, 221, 0.2)";
+  };
 
   return (
     <section
@@ -72,6 +75,21 @@ export default function NewsletterBand() {
         }}
       />
 
+      {/* Scoped placeholder color — same treatment as ApplicationForm. */}
+      <style jsx global>{`
+        .nl-input::placeholder {
+          color: #a8a39a;
+          opacity: 1;
+        }
+        .nl-input::-webkit-input-placeholder {
+          color: #a8a39a;
+        }
+        .nl-input::-moz-placeholder {
+          color: #a8a39a;
+          opacity: 1;
+        }
+      `}</style>
+
       <motion.div
         initial={{ opacity: 0, y: 16 }}
         whileInView={{ opacity: 1, y: 0 }}
@@ -96,15 +114,110 @@ export default function NewsletterBand() {
         </p>
 
         <div className="mt-10 w-full">
-          <iframe
-            data-tally-src={TALLY_SRC}
-            loading="lazy"
-            title="Newsletter signup"
-            className="mx-auto block w-full min-h-[120px] max-w-md"
-            style={{ border: 0, width: "100%" }}
-          />
+          <AnimatePresence mode="wait" initial={false}>
+            {status === "success" ? (
+              <motion.p
+                key="success"
+                initial={{ opacity: 0, y: 6 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.8, ease: EASE_SILK }}
+                className="font-display italic text-bone"
+                style={{
+                  fontSize: "clamp(1.05rem, 1.6vw, 1.35rem)",
+                  fontWeight: 400,
+                  letterSpacing: "-0.005em",
+                }}
+              >
+                You&apos;re in.
+              </motion.p>
+            ) : (
+              <motion.form
+                key="form"
+                onSubmit={onSubmit}
+                initial={{ opacity: 0, y: 6 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, ease: EASE_SILK }}
+                className="mx-auto flex w-full max-w-md flex-col items-stretch gap-4 sm:flex-row sm:items-end sm:gap-3"
+              >
+                <label htmlFor="nl-email" className="block flex-1 text-left">
+                  <span className="sr-only">Email address</span>
+                  <input
+                    id="nl-email"
+                    type="email"
+                    name="email"
+                    required
+                    autoComplete="email"
+                    placeholder="your email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    onFocus={(e) => onFocus(e.currentTarget)}
+                    onBlur={(e) => onBlur(e.currentTarget)}
+                    disabled={status === "submitting"}
+                    className="nl-input block w-full bg-transparent border-0 border-b border-solid py-3 px-0 text-bone outline-none transition-[border-color] duration-300 ease-out disabled:opacity-60"
+                    style={{
+                      borderBottomColor: "rgba(239, 233, 221, 0.2)",
+                      fontFamily: "inherit",
+                      fontSize: "15px",
+                      lineHeight: 1.5,
+                    }}
+                  />
+                </label>
+
+                <SubscribeButton submitting={status === "submitting"} />
+              </motion.form>
+            )}
+          </AnimatePresence>
+
+          {status === "error" && (
+            <p
+              className="mt-4 text-silver"
+              style={{ fontSize: "12px", letterSpacing: "0.05em" }}
+            >
+              Try again.
+            </p>
+          )}
         </div>
       </motion.div>
     </section>
+  );
+}
+
+function SubscribeButton({ submitting }) {
+  return (
+    <button
+      type="submit"
+      disabled={submitting}
+      aria-label="Subscribe"
+      className={[
+        "group relative inline-flex items-center justify-center",
+        "px-5 py-3 text-bone",
+        "transition-all duration-[700ms] ease-out",
+        "disabled:cursor-default",
+      ].join(" ")}
+      style={{
+        border: "1px solid rgba(239, 233, 221, 0.3)",
+        backgroundColor: "rgba(239, 233, 221, 0.04)",
+        letterSpacing: "0.15em",
+        textTransform: "uppercase",
+        fontSize: "12px",
+        fontWeight: 300,
+        opacity: submitting ? 0.6 : 1,
+        boxShadow: "0 0 0 rgba(239,233,221,0)",
+        minWidth: "56px",
+      }}
+      onMouseEnter={(e) => {
+        if (submitting) return;
+        e.currentTarget.style.borderColor = "rgba(239, 233, 221, 0.6)";
+        e.currentTarget.style.backgroundColor = "rgba(239, 233, 221, 0.08)";
+        e.currentTarget.style.boxShadow = "0 0 40px rgba(239,233,221,0.15)";
+      }}
+      onMouseLeave={(e) => {
+        e.currentTarget.style.borderColor = "rgba(239, 233, 221, 0.3)";
+        e.currentTarget.style.backgroundColor = "rgba(239, 233, 221, 0.04)";
+        e.currentTarget.style.boxShadow = "0 0 0 rgba(239,233,221,0)";
+      }}
+    >
+      {submitting ? "…" : "→"}
+    </button>
   );
 }
