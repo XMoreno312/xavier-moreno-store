@@ -13,7 +13,7 @@
 
 const TALLY_FORM_ID = "oblLvx";
 const TALLY_ENDPOINT = `https://api.tally.so/v1/forms/${TALLY_FORM_ID}/submissions`;
-const NOTIFY_TO = "bishopxavier20@gmail.com";
+const NOTIFY_TO = "musicaxmoreno@gmail.com";
 
 function escapeHtml(value) {
   return String(value ?? "")
