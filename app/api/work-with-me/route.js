@@ -65,9 +65,12 @@ export async function POST(request) {
   );
 
   // 3. Email via Resend if the env var is configured.
-  if (process.env.RESEND_API_KEY) {
+  const hasResend = Boolean(process.env.RESEND_API_KEY);
+  console.log("[work-with-me] RESEND_API_KEY present:", hasResend);
+
+  if (hasResend) {
     try {
-      await fetch("https://api.resend.com/emails", {
+      const resendRes = await fetch("https://api.resend.com/emails", {
         method: "POST",
         headers: {
           Authorization: `Bearer ${process.env.RESEND_API_KEY}`,
@@ -88,8 +91,17 @@ export async function POST(request) {
           `,
         }),
       });
+      const resendBody = await resendRes.text();
+      console.log(
+        "[work-with-me] Resend response:",
+        resendRes.status,
+        resendBody.slice(0, 500),
+      );
+      if (resendRes.ok) {
+        return Response.json({ ok: true, via: "resend" });
+      }
     } catch (e) {
-      console.error("[work-with-me] Resend failed", e);
+      console.error("[work-with-me] Resend threw:", e?.message || e);
     }
   }
 

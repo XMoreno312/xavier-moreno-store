@@ -55,9 +55,12 @@ export async function POST(request) {
   console.log("[subscribe submission]", JSON.stringify({ email }, null, 2));
 
   // 3. Email via Resend if configured.
-  if (process.env.RESEND_API_KEY) {
+  const hasResend = Boolean(process.env.RESEND_API_KEY);
+  console.log("[subscribe] RESEND_API_KEY present:", hasResend);
+
+  if (hasResend) {
     try {
-      await fetch("https://api.resend.com/emails", {
+      const resendRes = await fetch("https://api.resend.com/emails", {
         method: "POST",
         headers: {
           Authorization: `Bearer ${process.env.RESEND_API_KEY}`,
@@ -70,8 +73,17 @@ export async function POST(request) {
           html: `<p>New newsletter signup:</p><p><strong>${escapeHtml(email)}</strong></p>`,
         }),
       });
+      const resendBody = await resendRes.text();
+      console.log(
+        "[subscribe] Resend response:",
+        resendRes.status,
+        resendBody.slice(0, 500),
+      );
+      if (resendRes.ok) {
+        return Response.json({ ok: true, via: "resend" });
+      }
     } catch (e) {
-      console.error("[subscribe] Resend failed", e);
+      console.error("[subscribe] Resend threw:", e?.message || e);
     }
   }
 
