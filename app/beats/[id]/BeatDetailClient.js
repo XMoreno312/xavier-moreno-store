@@ -16,15 +16,35 @@ export default function BeatDetailClient({ beat, tiers, releaseNo }) {
   const playingThis = isCurrent && isPlaying;
   const selected = tiers.find((t) => t.id === selectedTier);
 
-  const handleLicense = () => {
+  const [checkoutBusy, setCheckoutBusy] = useState(false);
+  const [checkoutError, setCheckoutError] = useState(null);
+
+  const handleLicense = async () => {
     if (selected.id === "exclusive") {
-      window.location.href = `mailto:bishopxavier20@gmail.com?subject=Exclusive%20license%20inquiry%20—%20${encodeURIComponent(
-        beat.title
-      )}`;
+      // Exclusive routes through the application form, not a mailto.
+      window.location.href = `/work-with-me?beat=${encodeURIComponent(beat.id)}`;
       return;
     }
-    // TODO: wire to Stripe checkout
-    alert(`Checkout stub — ${beat.title} / ${selected.name}. Hook this up to Stripe next.`);
+    if (checkoutBusy) return;
+    setCheckoutBusy(true);
+    setCheckoutError(null);
+    try {
+      const res = await fetch("/api/checkout", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ beatId: beat.id, tierId: selected.id }),
+      });
+      const data = await res.json();
+      if (!res.ok || !data?.url) {
+        throw new Error(data?.error || `HTTP ${res.status}`);
+      }
+      window.location.href = data.url;
+    } catch (e) {
+      setCheckoutBusy(false);
+      setCheckoutError(
+        "Couldn't start checkout. Please try again or write directly.",
+      );
+    }
   };
 
   return (
@@ -257,16 +277,19 @@ export default function BeatDetailClient({ beat, tiers, releaseNo }) {
             {/* Primary CTA — editorial, single line, slower transition */}
             <button
               onClick={handleLicense}
-              className="group mt-14 inline-flex items-center gap-4 border border-bone/25 px-7 py-4 text-[10px] text-bone transition-colors duration-[700ms] hover:border-bone hover:bg-bone hover:text-stage"
+              disabled={checkoutBusy}
+              className="group mt-14 inline-flex items-center gap-4 border border-bone/25 px-7 py-4 text-[10px] text-bone transition-colors duration-[700ms] hover:border-bone hover:bg-bone hover:text-stage disabled:cursor-default disabled:opacity-60"
               style={{
                 letterSpacing: "0.38em",
                 textTransform: "uppercase",
                 transitionTimingFunction: "cubic-bezier(0.22, 0.6, 0.24, 1)",
               }}
             >
-              {selected.id === "exclusive"
-                ? "Inquire for Exclusive"
-                : "License This Production"}
+              {checkoutBusy
+                ? "Opening Checkout…"
+                : selected.id === "exclusive"
+                  ? "Inquire for Exclusive"
+                  : "License This Production"}
               <span
                 aria-hidden
                 className="transition-transform duration-[700ms] group-hover:translate-x-1"
@@ -275,6 +298,11 @@ export default function BeatDetailClient({ beat, tiers, releaseNo }) {
                 →
               </span>
             </button>
+            {checkoutError ? (
+              <p className="mt-5 max-w-md text-[12px] text-silver">
+                {checkoutError}
+              </p>
+            ) : null}
 
             <p className="mt-7 max-w-md text-[11px] text-silver/75">
               Prefer to talk first?{" "}

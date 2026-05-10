@@ -27,18 +27,33 @@ export default function BeatCard({ beat }) {
   const playingThis = isCurrent && isPlaying;
   const basePrice = LICENSE_TIERS[0].priceLabel;
 
-  const handleTierSelect = (tier) => {
+  const [checkoutBusy, setCheckoutBusy] = useState(false);
+
+  const handleTierSelect = async (tier) => {
     if (tier.id === "exclusive") {
-      window.location.href = `mailto:bishopxavier20@gmail.com?subject=Exclusive%20license%20inquiry%20—%20${encodeURIComponent(
-        beat.title
-      )}`;
+      // Exclusive is contact-only — route to the application form rather
+      // than open a mailto. Keeps the inquiry inside the site experience.
+      window.location.href = `/work-with-me?beat=${encodeURIComponent(beat.id)}`;
       return;
     }
-    // TODO: wire to Stripe checkout
-    // e.g. fetch("/api/checkout", { method: "POST", body: JSON.stringify({ beatId: beat.id, tier: tier.id })})
-    alert(
-      `Checkout stub — ${beat.title} / ${tier.name}. Hook this up to Stripe next.`
-    );
+    if (checkoutBusy) return;
+    setCheckoutBusy(true);
+    try {
+      const res = await fetch("/api/checkout", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ beatId: beat.id, tierId: tier.id }),
+      });
+      const data = await res.json();
+      if (!res.ok || !data?.url) {
+        throw new Error(data?.error || `HTTP ${res.status}`);
+      }
+      window.location.href = data.url;
+    } catch (e) {
+      setCheckoutBusy(false);
+      // eslint-disable-next-line no-alert
+      alert("Couldn't start checkout. Please try again or email bishopxavier20@gmail.com.");
+    }
   };
 
   return (

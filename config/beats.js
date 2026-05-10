@@ -7,6 +7,7 @@ export const LICENSE_TIERS = [
   {
     id: "mp3",
     name: "MP3 Lease",
+    stripePriceId: "price_1TVR7hBWayOomr4lCxDk7SIi",
     price: 25,
     priceLabel: "$25",
     delivery: "Untagged MP3 (320kbps)",
@@ -20,6 +21,7 @@ export const LICENSE_TIERS = [
   {
     id: "wav",
     name: "WAV Lease",
+    stripePriceId: "price_1TVR9KBWayOomr4lHFawQ0zR",
     price: 40,
     priceLabel: "$40",
     delivery: "Untagged WAV + MP3",
