@@ -9,8 +9,8 @@ export const dynamic = "force-dynamic";
  * Stripe redirects buyers here after payment with ?session_id=cs_...
  * We verify the session server-side, then show a thank-you that mirrors
  * the site's editorial voice. The actual file delivery happens via the
- * Stripe webhook (separate route) — this page is just the "yes, it
- * worked" moment.
+ * Stripe webhook (`/api/stripe/webhook`) — this page is just the "yes,
+ * it worked" moment, pointing the buyer to their inbox.
  */
 
 async function fetchSession(sessionId) {
@@ -83,10 +83,23 @@ export default async function CheckoutSuccessPage({ searchParams }) {
         </p>
 
         {paid && customerEmail ? (
-          <p className="mt-6 max-w-[420px] text-[12.5px] leading-relaxed text-silver">
-            Files and your license document are being sent to{" "}
+          <p className="mt-6 max-w-[440px] text-[12.5px] leading-relaxed text-silver">
+            Download links and your license document are being sent to{" "}
             <span className="text-bone/80">{customerEmail}</span>. Check your
             inbox in the next few minutes.
+          </p>
+        ) : null}
+
+        {paid ? (
+          <p className="mt-3 max-w-[440px] text-[11.5px] leading-relaxed text-silver/80">
+            Didn&apos;t get it? Check your spam folder, or message{" "}
+            <a
+              href="mailto:bishopxavier20@gmail.com"
+              className="text-bone/70 underline decoration-bone/30 underline-offset-2 transition-colors hover:text-bone hover:decoration-bone"
+            >
+              bishopxavier20@gmail.com
+            </a>
+            .
           </p>
         ) : null}
 
