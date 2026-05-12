@@ -22,61 +22,149 @@ export function useAudioPlayer() {
 
 /**
  * Global audio player state. A single <audio> element lives here so playback
- * survives navigation. When a beat has no audioUrl yet, we simulate playback
- * with a timer so the UI still behaves correctly — swap in real files when ready.
+ * survives navigation and only ever plays one beat at a time — every card
+ * and the persistent footer bar talk to the same provider.
+ *
+ * Source resolution:
+ *   - If `beat.audioUrl` is set, play that URL directly.
+ *   - Otherwise, fetch a 1h signed R2 URL from `/api/preview/[id]` and
+ *     play that. Resolved URLs are cached per-beat for the session so
+ *     toggling pause/play doesn't hit the API again.
+ *
+ * Failure modes:
+ *   - 404 from the preview API marks the beat as `errored`. The card
+ *     visual switches to a dimmed / "not yet" state and refuses to play
+ *     until the user picks a different beat (a future upload will clear
+ *     the cached error on a fresh page load).
  */
 export default function AudioPlayerProvider({ children }) {
   const audioRef = useRef(null);
-  const fakeTimerRef = useRef(null);
+  const urlCacheRef = useRef(new Map()); // beatId -> resolved playback URL
+  // The most recent beat the user asked to play. Used to ignore stale
+  // fetches when the user clicks a second card before the first resolves.
+  const pendingBeatRef = useRef(null);
 
   const [currentBeat, setCurrentBeat] = useState(null);
+  const [resolvedUrl, setResolvedUrl] = useState(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [progress, setProgress] = useState(0); // 0..1
-  const [duration, setDuration] = useState(0); // seconds (fake fallback = 30s)
-  // Tracks whether we're past hydration so the <audio> element only renders
-  // on the client without causing a server/client tree mismatch.
+  const [duration, setDuration] = useState(0); // seconds
+  const [loadingBeatId, setLoadingBeatId] = useState(null);
+  const [erroredBeats, setErroredBeats] = useState(() => new Set());
+
+  // Avoid SSR mismatch — only render the <audio> after hydration.
   const [mounted, setMounted] = useState(false);
   useEffect(() => setMounted(true), []);
 
-  const stopFakeTimer = useCallback(() => {
-    if (fakeTimerRef.current) {
-      clearInterval(fakeTimerRef.current);
-      fakeTimerRef.current = null;
-    }
+  const isBeatErrored = useCallback(
+    (beatId) => erroredBeats.has(beatId),
+    [erroredBeats],
+  );
+
+  const markErrored = useCallback((beatId) => {
+    setErroredBeats((prev) => {
+      if (prev.has(beatId)) return prev;
+      const next = new Set(prev);
+      next.add(beatId);
+      return next;
+    });
   }, []);
 
-  const startFakeTimer = useCallback(() => {
-    stopFakeTimer();
-    const fakeDuration = 30; // placeholder song length
-    setDuration(fakeDuration);
-    fakeTimerRef.current = setInterval(() => {
-      setProgress((p) => {
-        const next = p + 1 / fakeDuration;
-        if (next >= 1) {
-          stopFakeTimer();
-          setIsPlaying(false);
-          return 0;
-        }
-        return next;
-      });
-    }, 1000);
-  }, [stopFakeTimer]);
+  const clearErrored = useCallback((beatId) => {
+    setErroredBeats((prev) => {
+      if (!prev.has(beatId)) return prev;
+      const next = new Set(prev);
+      next.delete(beatId);
+      return next;
+    });
+  }, []);
+
+  /**
+   * Resolve a beat's playback URL — explicit `audioUrl`, then the
+   * per-session cache, then the preview API. Throws on 404 with a
+   * `code: 404` marker so callers can distinguish "not yet available"
+   * from real failures.
+   */
+  const resolvePlaybackUrl = useCallback(async (beat) => {
+    if (urlCacheRef.current.has(beat.id)) {
+      return urlCacheRef.current.get(beat.id);
+    }
+    if (beat.audioUrl) {
+      urlCacheRef.current.set(beat.id, beat.audioUrl);
+      return beat.audioUrl;
+    }
+    const res = await fetch(`/api/preview/${beat.id}`);
+    if (res.status === 404) {
+      const err = new Error("not yet available");
+      err.code = 404;
+      throw err;
+    }
+    if (!res.ok) {
+      throw new Error(`preview HTTP ${res.status}`);
+    }
+    const data = await res.json();
+    if (!data?.url) {
+      throw new Error("preview missing url");
+    }
+    urlCacheRef.current.set(beat.id, data.url);
+    return data.url;
+  }, []);
 
   const playBeat = useCallback(
-    (beat) => {
+    async (beat) => {
+      if (!beat) return;
       const isSame = currentBeat && currentBeat.id === beat.id;
 
       if (isSame) {
-        // toggle
-        setIsPlaying((prev) => !prev);
+        // Same beat — toggle, but don't toggle into "play" if we know it's
+        // errored.
+        if (erroredBeats.has(beat.id)) return;
+        setIsPlaying((p) => !p);
         return;
       }
 
+      // Switching beats — clear the stage.
+      pendingBeatRef.current = beat.id;
       setCurrentBeat(beat);
+      setResolvedUrl(null);
       setProgress(0);
-      setIsPlaying(true);
+      setDuration(0);
+      // Don't set isPlaying yet — wait for URL.
+      setIsPlaying(false);
+
+      // Cached path — synchronous resolution, no loading flash.
+      if (urlCacheRef.current.has(beat.id)) {
+        setResolvedUrl(urlCacheRef.current.get(beat.id));
+        setIsPlaying(true);
+        return;
+      }
+
+      // If we previously errored this beat, don't try again this session.
+      if (erroredBeats.has(beat.id)) return;
+
+      setLoadingBeatId(beat.id);
+      try {
+        const url = await resolvePlaybackUrl(beat);
+        if (pendingBeatRef.current !== beat.id) return; // user clicked elsewhere
+        setResolvedUrl(url);
+        setIsPlaying(true);
+        clearErrored(beat.id);
+      } catch (err) {
+        if (pendingBeatRef.current !== beat.id) return;
+        if (err?.code === 404) {
+          markErrored(beat.id);
+        } else {
+          // Surface in console — non-404 failures shouldn't be silent.
+          console.error("preview fetch failed", err);
+        }
+        setIsPlaying(false);
+        setCurrentBeat(null);
+        setResolvedUrl(null);
+      } finally {
+        setLoadingBeatId((id) => (id === beat.id ? null : id));
+      }
     },
-    [currentBeat]
+    [currentBeat, erroredBeats, resolvePlaybackUrl, markErrored, clearErrored],
   );
 
   const pause = useCallback(() => setIsPlaying(false), []);
@@ -92,22 +180,14 @@ export default function AudioPlayerProvider({ children }) {
     }
   }, []);
 
-  // Wire playback state to the real <audio> element when we have a URL.
+  // Wire playback state to the <audio> element. Fires whenever the
+  // resolved URL or play/pause intent changes.
   useEffect(() => {
     const audio = audioRef.current;
-    if (!audio || !currentBeat) return;
+    if (!audio || !currentBeat || !resolvedUrl) return;
 
-    if (!currentBeat.audioUrl) {
-      // Placeholder mode — use the fake timer
-      if (isPlaying) startFakeTimer();
-      else stopFakeTimer();
-      return () => stopFakeTimer();
-    }
-
-    // Real audio mode
-    stopFakeTimer();
-    if (audio.src !== currentBeat.audioUrl) {
-      audio.src = currentBeat.audioUrl;
+    if (audio.src !== resolvedUrl) {
+      audio.src = resolvedUrl;
     }
 
     if (isPlaying) {
@@ -115,9 +195,9 @@ export default function AudioPlayerProvider({ children }) {
     } else {
       audio.pause();
     }
-  }, [currentBeat, isPlaying, startFakeTimer, stopFakeTimer]);
+  }, [currentBeat, resolvedUrl, isPlaying]);
 
-  // Listen to real <audio> events for progress/duration.
+  // Listen for time/duration updates and end-of-track.
   useEffect(() => {
     const audio = audioRef.current;
     if (!audio) return;
@@ -149,21 +229,36 @@ export default function AudioPlayerProvider({ children }) {
       isPlaying,
       progress,
       duration,
+      loadingBeatId,
+      isBeatErrored,
       playBeat,
       pause,
       resume,
       togglePlay,
       seek,
     }),
-    [currentBeat, isPlaying, progress, duration, playBeat, pause, resume, togglePlay, seek]
+    [
+      currentBeat,
+      isPlaying,
+      progress,
+      duration,
+      loadingBeatId,
+      isBeatErrored,
+      playBeat,
+      pause,
+      resume,
+      togglePlay,
+      seek,
+    ],
   );
 
   return (
     <AudioPlayerContext.Provider value={value}>
       {children}
-      {/* Client-only <audio> — rendered after mount to avoid any SSR/hydration mismatch */}
+      {/* Client-only <audio> — rendered after mount to avoid SSR mismatch.
+          preload="none" because the URL is resolved lazily on first play. */}
       {mounted ? (
-        <audio ref={audioRef} preload="metadata" className="hidden" />
+        <audio ref={audioRef} preload="none" className="hidden" />
       ) : null}
     </AudioPlayerContext.Provider>
   );

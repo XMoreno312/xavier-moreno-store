@@ -8,12 +8,30 @@ import CoverStill from "@/components/beats/CoverStill";
 // Same curve as the landing + masthead + cards — one vocabulary.
 const EASE_SILK = [0.22, 0.6, 0.24, 1];
 
+function formatTime(seconds) {
+  if (!seconds || Number.isNaN(seconds) || !Number.isFinite(seconds)) return "0:00";
+  const m = Math.floor(seconds / 60);
+  const s = Math.floor(seconds % 60);
+  return `${m}:${s.toString().padStart(2, "0")}`;
+}
+
 export default function BeatDetailClient({ beat, tiers, releaseNo }) {
-  const { currentBeat, isPlaying, playBeat } = useAudioPlayer();
+  const {
+    currentBeat,
+    isPlaying,
+    progress,
+    duration,
+    loadingBeatId,
+    isBeatErrored,
+    playBeat,
+    seek,
+  } = useAudioPlayer();
   const [selectedTier, setSelectedTier] = useState(tiers[0].id);
 
   const isCurrent = currentBeat?.id === beat.id;
   const playingThis = isCurrent && isPlaying;
+  const loadingThis = loadingBeatId === beat.id;
+  const erroredThis = isBeatErrored(beat.id);
   const selected = tiers.find((t) => t.id === selectedTier);
 
   const [checkoutBusy, setCheckoutBusy] = useState(false);
@@ -46,6 +64,26 @@ export default function BeatDetailClient({ beat, tiers, releaseNo }) {
       );
     }
   };
+
+  const handlePreview = () => {
+    if (erroredThis) return;
+    playBeat(beat);
+  };
+
+  // Click-to-seek on the progress bar. Only meaningful when this beat
+  // is loaded — silently no-ops otherwise.
+  const handleScrub = (e) => {
+    if (!isCurrent || !duration) return;
+    const rect = e.currentTarget.getBoundingClientRect();
+    const ratio = (e.clientX - rect.left) / rect.width;
+    seek(ratio);
+  };
+
+  // Progress is 0..1 globally, but only reflects this beat when it's
+  // current — otherwise the bar should sit empty regardless of what
+  // else is playing.
+  const visualProgress = isCurrent ? progress : 0;
+  const elapsed = isCurrent && duration ? duration * progress : 0;
 
   return (
     <motion.article
@@ -144,41 +182,156 @@ export default function BeatDetailClient({ beat, tiers, releaseNo }) {
             </span>
           </motion.div>
 
-          {/* Preview — editorial line, not a media-player button */}
-          <motion.button
-            initial={{ opacity: 0, y: 6 }}
+          {/* Prominent preview control — sits just above the licensing
+              section so it reads as the "audition this" gesture before
+              you commit to a license. Larger play glyph than the card,
+              thin bone progress line, scrubbable when audio is loaded.
+              Same provider as the cards, so playback coordinates across
+              the whole site. */}
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 1.5, delay: 1.1, ease: EASE_SILK }}
-            onClick={() => playBeat(beat)}
-            className="group mt-12 inline-flex items-center gap-4 self-start pb-2 text-[10px] text-bone/85 transition-colors duration-[700ms] hover:text-bone"
-            style={{
-              letterSpacing: "0.36em",
-              textTransform: "uppercase",
-              transitionTimingFunction: "cubic-bezier(0.22, 0.6, 0.24, 1)",
-            }}
+            className="mt-16 sm:mt-20"
           >
-            {playingThis ? (
-              <>
-                <svg viewBox="0 0 24 24" className="h-3 w-3" fill="currentColor" aria-hidden>
-                  <rect x="7" y="5" width="3" height="14" rx="0.6" />
-                  <rect x="14" y="5" width="3" height="14" rx="0.6" />
-                </svg>
-                Pause Preview
-              </>
-            ) : (
-              <>
-                <svg viewBox="0 0 24 24" className="h-3 w-3" fill="currentColor" aria-hidden>
-                  <path d="M7 5v14l12-7L7 5z" />
-                </svg>
-                Play Preview
-              </>
-            )}
-            <span
-              aria-hidden
-              className="inline-block h-px w-6 bg-bone/30 transition-all duration-[700ms] group-hover:w-10 group-hover:bg-bone/70"
-              style={{ transitionTimingFunction: "cubic-bezier(0.22, 0.6, 0.24, 1)" }}
-            />
-          </motion.button>
+            <p
+              className="text-[10px] text-silver"
+              style={{ letterSpacing: "0.52em", textTransform: "uppercase" }}
+            >
+              Preview
+            </p>
+
+            <div className="mt-5 flex items-center gap-6 sm:gap-7">
+              <button
+                type="button"
+                onClick={handlePreview}
+                disabled={erroredThis}
+                aria-label={
+                  erroredThis
+                    ? `Preview not yet available for ${beat.title}`
+                    : playingThis
+                      ? `Pause preview of ${beat.title}`
+                      : loadingThis
+                        ? `Loading preview of ${beat.title}`
+                        : `Play preview of ${beat.title}`
+                }
+                title={erroredThis ? "Not yet — coming soon" : undefined}
+                className={[
+                  "group relative flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full border transition-[border-color,background-color,color,box-shadow,transform] duration-[700ms] sm:h-14 sm:w-14",
+                  erroredThis
+                    ? "cursor-default border-bone/15 bg-transparent text-bone/35"
+                    : "border-bone/30 bg-transparent text-bone hover:border-bone hover:bg-bone hover:text-stage",
+                  playingThis && !erroredThis
+                    ? "border-bone/60 shadow-[0_0_36px_rgba(239,233,221,0.16)]"
+                    : "",
+                ].join(" ")}
+                style={{ transitionTimingFunction: "cubic-bezier(0.22, 0.6, 0.24, 1)" }}
+              >
+                {/* Pulsing ring while playing — gentle bone breath */}
+                {playingThis && !erroredThis ? (
+                  <span
+                    aria-hidden
+                    className="pointer-events-none absolute inset-[-6px] rounded-full"
+                    style={{
+                      boxShadow: "0 0 0 1px rgba(239,233,221,0.22)",
+                      animation:
+                        "xm-detail-pulse 2.4s cubic-bezier(0.22, 0.6, 0.24, 1) infinite",
+                    }}
+                  />
+                ) : null}
+
+                {loadingThis ? (
+                  <svg
+                    viewBox="0 0 24 24"
+                    className="h-4 w-4 animate-spin sm:h-[18px] sm:w-[18px]"
+                    fill="none"
+                    aria-hidden
+                    style={{ animationDuration: "1.4s" }}
+                  >
+                    <circle
+                      cx="12"
+                      cy="12"
+                      r="9"
+                      stroke="currentColor"
+                      strokeOpacity="0.25"
+                      strokeWidth="2"
+                    />
+                    <path
+                      d="M21 12a9 9 0 0 0-9-9"
+                      stroke="currentColor"
+                      strokeOpacity="0.85"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                    />
+                  </svg>
+                ) : playingThis ? (
+                  <svg
+                    viewBox="0 0 24 24"
+                    className="h-4 w-4 sm:h-[18px] sm:w-[18px]"
+                    fill="currentColor"
+                    aria-hidden
+                  >
+                    <rect x="7" y="5" width="3.2" height="14" rx="0.6" />
+                    <rect x="13.8" y="5" width="3.2" height="14" rx="0.6" />
+                  </svg>
+                ) : (
+                  <svg
+                    viewBox="0 0 24 24"
+                    className="h-4 w-4 translate-x-[1px] sm:h-[18px] sm:w-[18px]"
+                    fill="currentColor"
+                    aria-hidden
+                  >
+                    <path d="M7 5v14l12-7L7 5z" />
+                  </svg>
+                )}
+              </button>
+
+              {/* Progress strip + time readout. Thin, bone-tinted, and
+                  click-to-scrub. Reads "Not yet — coming soon" when the
+                  master hasn't been uploaded to R2. */}
+              <div className="flex min-w-0 flex-1 flex-col gap-3">
+                <button
+                  type="button"
+                  onClick={handleScrub}
+                  disabled={!isCurrent || !duration || erroredThis}
+                  aria-label="Seek preview"
+                  className={[
+                    "relative h-px w-full cursor-pointer bg-bone/15 transition-colors duration-[700ms]",
+                    !isCurrent || !duration || erroredThis
+                      ? "cursor-default"
+                      : "hover:bg-bone/25",
+                  ].join(" ")}
+                  style={{ transitionTimingFunction: "cubic-bezier(0.22, 0.6, 0.24, 1)" }}
+                >
+                  <span
+                    aria-hidden
+                    className="block h-px bg-bone/85 transition-[width] duration-200 ease-linear"
+                    style={{ width: `${visualProgress * 100}%` }}
+                  />
+                </button>
+
+                <div
+                  className="flex items-center justify-between text-[10px] text-silver/70"
+                  style={{ letterSpacing: "0.32em", textTransform: "uppercase" }}
+                >
+                  <span>
+                    {erroredThis
+                      ? "Not Yet · Coming Soon"
+                      : loadingThis
+                        ? "Loading"
+                        : playingThis
+                          ? "Now Playing"
+                          : isCurrent
+                            ? "Paused"
+                            : "Tap Play"}
+                  </span>
+                  <span className="font-mono text-[10px] tracking-[0.18em] text-silver/60">
+                    {formatTime(elapsed)} / {isCurrent ? formatTime(duration) : "0:00"}
+                  </span>
+                </div>
+              </div>
+            </div>
+          </motion.div>
 
           {/* Licensing block — more breathing room, quieter dividers */}
           <motion.section
@@ -318,6 +471,24 @@ export default function BeatDetailClient({ beat, tiers, releaseNo }) {
           </motion.section>
         </div>
       </div>
+
+      {/* Pulse keyframes for the play button ring */}
+      <style jsx>{`
+        @keyframes xm-detail-pulse {
+          0% {
+            box-shadow: 0 0 0 1px rgba(239, 233, 221, 0.22);
+            opacity: 0.85;
+          }
+          50% {
+            box-shadow: 0 0 32px rgba(239, 233, 221, 0.14);
+            opacity: 1;
+          }
+          100% {
+            box-shadow: 0 0 0 1px rgba(239, 233, 221, 0.22);
+            opacity: 0.85;
+          }
+        }
+      `}</style>
     </motion.article>
   );
 }

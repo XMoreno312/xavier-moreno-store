@@ -28,6 +28,29 @@ function PlayGlyph({ playing }) {
   );
 }
 
+// Bone-tinted spinner — same visual language as the rest of the site,
+// no system blue. Spins slowly so it reads as anticipation, not progress.
+function Spinner() {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      className="h-3 w-3 animate-spin"
+      fill="none"
+      aria-hidden
+      style={{ animationDuration: "1.4s" }}
+    >
+      <circle cx="12" cy="12" r="9" stroke="currentColor" strokeOpacity="0.25" strokeWidth="2" />
+      <path
+        d="M21 12a9 9 0 0 0-9-9"
+        stroke="currentColor"
+        strokeOpacity="0.85"
+        strokeWidth="2"
+        strokeLinecap="round"
+      />
+    </svg>
+  );
+}
+
 /**
  * A release — not a product line item. No price, no "add to cart".
  * Clicking the title/card routes to /beats/[id] where licensing is
@@ -39,6 +62,12 @@ function PlayGlyph({ playing }) {
  * warms from bone/10 to bone/30; the play pill lifts and glows; the
  * italic mood line lifts from 0.75 → 1.0 opacity. Everything sits on the
  * same silk curve as the rest of the site.
+ *
+ * Audio is resolved through the global AudioPlayerProvider — clicks call
+ * `playBeat(beat)`, which lazily fetches a 1h R2 URL the first time.
+ * While the URL is in flight the pill shows a bone spinner; if the
+ * beat's MP3 hasn't been uploaded yet the pill dims and shows a
+ * "not yet" tooltip on hover.
  */
 export default function ProductionCard({
   beat,
@@ -47,15 +76,25 @@ export default function ProductionCard({
   showLicenseCta = false,
   disableOffset = false,
 }) {
-  const { currentBeat, isPlaying, playBeat } = useAudioPlayer();
+  const {
+    currentBeat,
+    isPlaying,
+    playBeat,
+    loadingBeatId,
+    isBeatErrored,
+  } = useAudioPlayer();
+
   const isCurrent = currentBeat?.id === beat.id;
   const playingThis = isCurrent && isPlaying;
+  const loadingThis = loadingBeatId === beat.id;
+  const erroredThis = isBeatErrored(beat.id);
 
   const offsetClass = disableOffset ? "" : OFFSETS[index % OFFSETS.length];
 
   const handlePreview = (e) => {
     e.preventDefault();
     e.stopPropagation();
+    if (erroredThis) return;
     playBeat(beat);
   };
 
@@ -84,6 +123,16 @@ export default function ProductionCard({
     mx.set(0);
     my.set(0);
   };
+
+  // Tooltip + button label vary with state, but the pill geometry is
+  // the same so layout never shifts under the user.
+  const buttonAriaLabel = erroredThis
+    ? `Preview not yet available for ${beat.title}`
+    : playingThis
+      ? `Pause preview of ${beat.title}`
+      : loadingThis
+        ? `Loading preview of ${beat.title}`
+        : `Preview ${beat.title}`;
 
   return (
     <motion.article
@@ -125,21 +174,55 @@ export default function ProductionCard({
             style={{ transitionTimingFunction: "cubic-bezier(0.22, 1, 0.36, 1)" }}
           />
 
+          {/* Pulsing ring — only while THIS beat is playing. Sits behind
+              the pill, gentle bone tint, breathes ~2s per cycle. */}
+          {playingThis ? (
+            <span
+              aria-hidden
+              className="pointer-events-none absolute left-1/2 top-1/2 z-[5] block -translate-x-1/2 -translate-y-1/2 rounded-full"
+              style={{
+                width: 120,
+                height: 44,
+                boxShadow: "0 0 0 1px rgba(239,233,221,0.18)",
+                animation: "xm-preview-pulse 2.4s cubic-bezier(0.22, 1, 0.36, 1) infinite",
+              }}
+            />
+          ) : null}
+
           {/* Preview play — center, emphasized on hover: lifts in, scales
-              from 1 → 1.1, and picks up a bone-tinted glow */}
+              from 1 → 1.1, and picks up a bone-tinted glow. Disabled +
+              dimmed when the beat's MP3 isn't in R2 yet. */}
           <button
             onClick={handlePreview}
-            aria-label={playingThis ? `Pause preview of ${beat.title}` : `Preview ${beat.title}`}
+            aria-label={buttonAriaLabel}
+            title={erroredThis ? "Not yet — coming soon" : undefined}
+            disabled={erroredThis}
             className={[
-              "absolute left-1/2 top-1/2 z-10 flex -translate-x-1/2 -translate-y-1/2 items-center gap-2 rounded-full border border-bone/30 bg-black/45 px-5 py-2.5 text-[10px] uppercase tracking-[0.32em] text-bone backdrop-blur-md transition-[opacity,transform,box-shadow,background-color,border-color] duration-[700ms] will-change-transform",
-              playingThis
-                ? "opacity-100 scale-110 bg-black/55 border-bone/50 shadow-[0_0_40px_rgba(239,233,221,0.18)]"
-                : "opacity-0 scale-100 group-hover:opacity-100 group-hover:scale-110 group-hover:shadow-[0_0_40px_rgba(239,233,221,0.18)] focus:opacity-100 focus:scale-110",
+              "absolute left-1/2 top-1/2 z-10 flex -translate-x-1/2 -translate-y-1/2 items-center gap-2 rounded-full border border-bone/30 bg-black/45 px-5 py-2.5 text-[10px] uppercase tracking-[0.32em] text-bone backdrop-blur-md transition-[opacity,transform,box-shadow,background-color,border-color,color] duration-[700ms] will-change-transform",
+              erroredThis
+                ? "opacity-100 scale-100 cursor-default border-bone/15 bg-black/30 text-bone/45"
+                : playingThis
+                  ? "opacity-100 scale-110 bg-black/55 border-bone/50 shadow-[0_0_40px_rgba(239,233,221,0.18)]"
+                  : "opacity-0 scale-100 group-hover:opacity-100 group-hover:scale-110 group-hover:shadow-[0_0_40px_rgba(239,233,221,0.18)] focus:opacity-100 focus:scale-110",
             ].join(" ")}
             style={{ transitionTimingFunction: "cubic-bezier(0.22, 1, 0.36, 1)" }}
           >
-            <PlayGlyph playing={playingThis} />
-            <span>{playingThis ? "Pause" : "Preview"}</span>
+            {loadingThis ? (
+              <>
+                <Spinner />
+                <span>Loading</span>
+              </>
+            ) : erroredThis ? (
+              <>
+                <PlayGlyph playing={false} />
+                <span>Not Yet</span>
+              </>
+            ) : (
+              <>
+                <PlayGlyph playing={playingThis} />
+                <span>{playingThis ? "Pause" : "Preview"}</span>
+              </>
+            )}
           </button>
         </motion.div>
 
@@ -235,6 +318,29 @@ export default function ProductionCard({
           </div>
         </div>
       </Link>
+
+      {/* Pulse keyframes — scoped via styled-jsx so we don't pollute
+          tailwind.config or globals. Breathes 1.0 → 1.06 → 1.0 on the
+          ring's transform and softens the shadow at the apex. */}
+      <style jsx>{`
+        @keyframes xm-preview-pulse {
+          0% {
+            transform: translate(-50%, -50%) scale(1);
+            box-shadow: 0 0 0 1px rgba(239, 233, 221, 0.18);
+            opacity: 0.85;
+          }
+          50% {
+            transform: translate(-50%, -50%) scale(1.06);
+            box-shadow: 0 0 28px rgba(239, 233, 221, 0.12);
+            opacity: 1;
+          }
+          100% {
+            transform: translate(-50%, -50%) scale(1);
+            box-shadow: 0 0 0 1px rgba(239, 233, 221, 0.18);
+            opacity: 0.85;
+          }
+        }
+      `}</style>
     </motion.article>
   );
 }
