@@ -197,8 +197,12 @@ export default function AudioPlayerProvider({ children }) {
     }
   }, [currentBeat, resolvedUrl, isPlaying]);
 
-  // Listen for time/duration updates and end-of-track.
+  // Listen for time/duration updates and end-of-track. We have to wait
+  // for `mounted` to flip before the <audio> element renders — running
+  // this on first mount would find `audioRef.current === null` and bail,
+  // which is exactly the bug that left progress + duration stuck at 0.
   useEffect(() => {
+    if (!mounted) return;
     const audio = audioRef.current;
     if (!audio) return;
 
@@ -221,7 +225,7 @@ export default function AudioPlayerProvider({ children }) {
       audio.removeEventListener("loadedmetadata", onTime);
       audio.removeEventListener("ended", onEnd);
     };
-  }, []);
+  }, [mounted]);
 
   const value = useMemo(
     () => ({
