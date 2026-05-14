@@ -20,6 +20,10 @@ export function useAudioPlayer() {
   return ctx;
 }
 
+// Signed R2 URLs live for an hour. Treat anything older than 50min as
+// stale so we never hand back a URL that's about to expire mid-play.
+const URL_FRESH_MS = 50 * 60 * 1000;
+
 /**
  * Global audio player state. A single <audio> element lives here so playback
  * survives navigation and only ever plays one beat at a time — every card
@@ -28,8 +32,18 @@ export function useAudioPlayer() {
  * Source resolution:
  *   - If `beat.audioUrl` is set, play that URL directly.
  *   - Otherwise, fetch a 1h signed R2 URL from `/api/preview/[id]` and
- *     play that. Resolved URLs are cached per-beat for the session so
- *     toggling pause/play doesn't hit the API again.
+ *     play that. Resolved URLs are cached per-beat (with a timestamp)
+ *     so toggling pause/play doesn't hit the API again, and so callers
+ *     can warm the cache via `prefetchBeat` on mount/hover.
+ *
+ * iOS Safari note:
+ *   WebKit only honors `audio.play()` when it's called synchronously in
+ *   the same call stack as a user gesture. Any `await` between the tap
+ *   and `play()` strips that permission silently. The play path here is
+ *   structured so that — when the URL is already cached and fresh — we
+ *   set `audio.src` and call `audio.play()` synchronously inside the
+ *   gesture handler. The async fetch path is only used as a fallback
+ *   when the prefetch hasn't completed.
  *
  * Failure modes:
  *   - 404 from the preview API marks the beat as `errored`. The card
@@ -39,7 +53,12 @@ export function useAudioPlayer() {
  */
 export default function AudioPlayerProvider({ children }) {
   const audioRef = useRef(null);
-  const urlCacheRef = useRef(new Map()); // beatId -> resolved playback URL
+  // beatId -> { url, fetchedAt }. Timestamp lets us prefetch on mount
+  // and know when a cached URL has gone stale.
+  const urlCacheRef = useRef(new Map());
+  // Inflight prefetches keyed by beatId — dedupes mount + hover firing
+  // concurrently so we only hit /api/preview once per fresh window.
+  const inflightRef = useRef(new Map());
   // The most recent beat the user asked to play. Used to ignore stale
   // fetches when the user clicks a second card before the first resolves.
   const pendingBeatRef = useRef(null);
@@ -79,65 +98,179 @@ export default function AudioPlayerProvider({ children }) {
     });
   }, []);
 
+  // Returns the cached URL for a beat if we have one that's still fresh.
+  // Returns null otherwise — callers should fall back to async fetch.
+  const getFreshCachedUrl = useCallback((beatId) => {
+    const entry = urlCacheRef.current.get(beatId);
+    if (!entry) return null;
+    if (Date.now() - entry.fetchedAt > URL_FRESH_MS) return null;
+    return entry.url;
+  }, []);
+
+  /**
+   * Fire-and-forget URL warmer. Called on detail-page mount and on
+   * first-hover of a card so by the time the user taps play, the
+   * signed R2 URL is already cached and the play handler can run
+   * synchronously (which is what iOS Safari requires).
+   *
+   * No-ops if:
+   *   - we already have a fresh cached URL,
+   *   - a prefetch is already inflight for this beat,
+   *   - the beat is known-errored (don't re-pummel the 404 endpoint),
+   *   - the beat has a static `audioUrl` (nothing to fetch).
+   */
+  const prefetchBeat = useCallback(
+    (beatId) => {
+      if (!beatId) return;
+      if (getFreshCachedUrl(beatId)) return;
+      if (inflightRef.current.has(beatId)) return;
+      if (erroredBeats.has(beatId)) return;
+
+      const p = (async () => {
+        try {
+          const res = await fetch(`/api/preview/${beatId}`);
+          if (res.status === 404) {
+            markErrored(beatId);
+            return;
+          }
+          if (!res.ok) return;
+          const data = await res.json();
+          if (!data?.url) return;
+          urlCacheRef.current.set(beatId, {
+            url: data.url,
+            fetchedAt: Date.now(),
+          });
+        } catch {
+          // Swallow — prefetch is best-effort. The play handler will
+          // surface real failures if/when the user actually taps.
+        } finally {
+          inflightRef.current.delete(beatId);
+        }
+      })();
+      inflightRef.current.set(beatId, p);
+    },
+    [erroredBeats, getFreshCachedUrl, markErrored],
+  );
+
   /**
    * Resolve a beat's playback URL — explicit `audioUrl`, then the
    * per-session cache, then the preview API. Throws on 404 with a
    * `code: 404` marker so callers can distinguish "not yet available"
    * from real failures.
    */
-  const resolvePlaybackUrl = useCallback(async (beat) => {
-    if (urlCacheRef.current.has(beat.id)) {
-      return urlCacheRef.current.get(beat.id);
-    }
-    if (beat.audioUrl) {
-      urlCacheRef.current.set(beat.id, beat.audioUrl);
-      return beat.audioUrl;
-    }
-    const res = await fetch(`/api/preview/${beat.id}`);
-    if (res.status === 404) {
-      const err = new Error("not yet available");
-      err.code = 404;
-      throw err;
-    }
-    if (!res.ok) {
-      throw new Error(`preview HTTP ${res.status}`);
-    }
-    const data = await res.json();
-    if (!data?.url) {
-      throw new Error("preview missing url");
-    }
-    urlCacheRef.current.set(beat.id, data.url);
-    return data.url;
-  }, []);
+  const resolvePlaybackUrl = useCallback(
+    async (beat) => {
+      const cached = getFreshCachedUrl(beat.id);
+      if (cached) return cached;
+      if (beat.audioUrl) {
+        urlCacheRef.current.set(beat.id, {
+          url: beat.audioUrl,
+          fetchedAt: Date.now(),
+        });
+        return beat.audioUrl;
+      }
+      // If a prefetch is already in flight, wait on it rather than
+      // firing a duplicate request.
+      const inflight = inflightRef.current.get(beat.id);
+      if (inflight) {
+        await inflight;
+        const afterInflight = getFreshCachedUrl(beat.id);
+        if (afterInflight) return afterInflight;
+      }
+      const res = await fetch(`/api/preview/${beat.id}`);
+      if (res.status === 404) {
+        const err = new Error("not yet available");
+        err.code = 404;
+        throw err;
+      }
+      if (!res.ok) {
+        throw new Error(`preview HTTP ${res.status}`);
+      }
+      const data = await res.json();
+      if (!data?.url) {
+        throw new Error("preview missing url");
+      }
+      urlCacheRef.current.set(beat.id, {
+        url: data.url,
+        fetchedAt: Date.now(),
+      });
+      return data.url;
+    },
+    [getFreshCachedUrl],
+  );
 
   const playBeat = useCallback(
     async (beat) => {
       if (!beat) return;
       const isSame = currentBeat && currentBeat.id === beat.id;
+      const audio = audioRef.current;
 
       if (isSame) {
         // Same beat — toggle, but don't toggle into "play" if we know it's
         // errored.
         if (erroredBeats.has(beat.id)) return;
+        // Synchronous toggle path. When we're flipping from paused to
+        // playing on a beat we already loaded, drive the <audio> element
+        // directly from the gesture stack so iOS WebKit respects it.
+        if (audio && !isPlaying) {
+          // Defensive: if for any reason src drifted from resolvedUrl
+          // (shouldn't, but cheap to assert), restore it before play.
+          if (resolvedUrl && audio.src !== resolvedUrl) {
+            audio.src = resolvedUrl;
+          }
+          const playPromise = audio.play();
+          if (playPromise && typeof playPromise.catch === "function") {
+            playPromise.catch(() => setIsPlaying(false));
+          }
+          setIsPlaying(true);
+          return;
+        }
         setIsPlaying((p) => !p);
         return;
       }
 
       // Switching beats — clear the stage.
       pendingBeatRef.current = beat.id;
+
+      // FAST PATH (iOS-safe): we already have a fresh URL cached, so
+      // set src + call play() synchronously from inside the gesture.
+      // No awaits between here and audio.play() — that's the contract
+      // iOS Safari enforces for user-initiated playback.
+      const cachedUrl =
+        getFreshCachedUrl(beat.id) ||
+        (beat.audioUrl ? beat.audioUrl : null);
+      if (cachedUrl && audio) {
+        if (beat.audioUrl && !urlCacheRef.current.has(beat.id)) {
+          urlCacheRef.current.set(beat.id, {
+            url: beat.audioUrl,
+            fetchedAt: Date.now(),
+          });
+        }
+        setCurrentBeat(beat);
+        setResolvedUrl(cachedUrl);
+        setProgress(0);
+        setDuration(0);
+        if (audio.src !== cachedUrl) {
+          audio.src = cachedUrl;
+        }
+        const playPromise = audio.play();
+        if (playPromise && typeof playPromise.catch === "function") {
+          playPromise.catch(() => setIsPlaying(false));
+        }
+        setIsPlaying(true);
+        clearErrored(beat.id);
+        return;
+      }
+
+      // SLOW PATH — no cached URL. We have to fetch first, which means
+      // play() will be detached from the user gesture and iOS Safari
+      // will refuse. Prefetch on mount/hover is the mitigation; this
+      // branch should be the exception, not the rule.
       setCurrentBeat(beat);
       setResolvedUrl(null);
       setProgress(0);
       setDuration(0);
-      // Don't set isPlaying yet — wait for URL.
       setIsPlaying(false);
-
-      // Cached path — synchronous resolution, no loading flash.
-      if (urlCacheRef.current.has(beat.id)) {
-        setResolvedUrl(urlCacheRef.current.get(beat.id));
-        setIsPlaying(true);
-        return;
-      }
 
       // If we previously errored this beat, don't try again this session.
       if (erroredBeats.has(beat.id)) return;
@@ -164,7 +297,16 @@ export default function AudioPlayerProvider({ children }) {
         setLoadingBeatId((id) => (id === beat.id ? null : id));
       }
     },
-    [currentBeat, erroredBeats, resolvePlaybackUrl, markErrored, clearErrored],
+    [
+      currentBeat,
+      erroredBeats,
+      isPlaying,
+      resolvedUrl,
+      getFreshCachedUrl,
+      resolvePlaybackUrl,
+      markErrored,
+      clearErrored,
+    ],
   );
 
   const pause = useCallback(() => setIsPlaying(false), []);
@@ -182,6 +324,11 @@ export default function AudioPlayerProvider({ children }) {
 
   // Wire playback state to the <audio> element. Fires whenever the
   // resolved URL or play/pause intent changes.
+  //
+  // For the iOS-safe fast path, audio.src + audio.play() are already
+  // called synchronously inside playBeat — this effect is mostly a
+  // no-op in that case (src already matches, isPlaying already true).
+  // It still runs the slow-path play (post-fetch) and handles pause.
   useEffect(() => {
     const audio = audioRef.current;
     if (!audio || !currentBeat || !resolvedUrl) return;
@@ -191,7 +338,9 @@ export default function AudioPlayerProvider({ children }) {
     }
 
     if (isPlaying) {
-      audio.play().catch(() => setIsPlaying(false));
+      if (audio.paused) {
+        audio.play().catch(() => setIsPlaying(false));
+      }
     } else {
       audio.pause();
     }
@@ -236,6 +385,7 @@ export default function AudioPlayerProvider({ children }) {
       loadingBeatId,
       isBeatErrored,
       playBeat,
+      prefetchBeat,
       pause,
       resume,
       togglePlay,
@@ -249,6 +399,7 @@ export default function AudioPlayerProvider({ children }) {
       loadingBeatId,
       isBeatErrored,
       playBeat,
+      prefetchBeat,
       pause,
       resume,
       togglePlay,

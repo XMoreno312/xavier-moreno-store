@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { useAudioPlayer } from "@/components/AudioPlayerProvider";
 import CoverStill from "@/components/beats/CoverStill";
@@ -24,6 +24,7 @@ export default function BeatDetailClient({ beat, tiers, releaseNo }) {
     loadingBeatId,
     isBeatErrored,
     playBeat,
+    prefetchBeat,
     seek,
   } = useAudioPlayer();
   const [selectedTier, setSelectedTier] = useState(tiers[0].id);
@@ -33,6 +34,14 @@ export default function BeatDetailClient({ beat, tiers, releaseNo }) {
   const loadingThis = loadingBeatId === beat.id;
   const erroredThis = isBeatErrored(beat.id);
   const selected = tiers.find((t) => t.id === selectedTier);
+
+  // Prefetch the signed R2 URL on mount so by the time the visitor taps
+  // play, the URL is already in the provider's cache and the play call
+  // can run synchronously inside the user-gesture stack — which is what
+  // iOS Safari requires to actually start playback.
+  useEffect(() => {
+    prefetchBeat(beat.id);
+  }, [beat.id, prefetchBeat]);
 
   const [checkoutBusy, setCheckoutBusy] = useState(false);
   const [checkoutError, setCheckoutError] = useState(null);

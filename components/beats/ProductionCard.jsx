@@ -80,6 +80,7 @@ export default function ProductionCard({
     currentBeat,
     isPlaying,
     playBeat,
+    prefetchBeat,
     loadingBeatId,
     isBeatErrored,
   } = useAudioPlayer();
@@ -101,6 +102,8 @@ export default function ProductionCard({
   // Mouse parallax — raw motion values driven by pointer, springed for
   // smoothness. Max drift is ~6px on each axis.
   const coverRef = useRef(null);
+  // One-shot guard so we only warm the signed-URL cache once per mount.
+  const prefetchedRef = useRef(false);
   const mx = useMotionValue(0);
   const my = useMotionValue(0);
   const springConfig = { stiffness: 80, damping: 20, mass: 0.6 };
@@ -112,6 +115,13 @@ export default function ProductionCard({
   const handleMouseMove = (e) => {
     const el = coverRef.current;
     if (!el) return;
+    // First pointer interaction over the card is the earliest reliable
+    // signal of intent — warm the signed-URL cache now so the eventual
+    // play tap can run synchronously (iOS Safari requirement).
+    if (!prefetchedRef.current) {
+      prefetchedRef.current = true;
+      prefetchBeat(beat.id);
+    }
     const rect = el.getBoundingClientRect();
     const nx = (e.clientX - rect.left) / rect.width - 0.5;
     const ny = (e.clientY - rect.top) / rect.height - 0.5;
