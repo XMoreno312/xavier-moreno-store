@@ -40,7 +40,7 @@ export default function BeatsMasthead() {
         }}
       />
 
-      {/* 1. Warm gold haze — slower, shorter amplitude than the landing */}
+      {/* 1. Iris haze — the catalog's signature violet, slow drift */}
       <motion.div
         aria-hidden
         initial={{ x: "-5%", y: "-2%", scale: 1.05 }}
@@ -54,7 +54,7 @@ export default function BeatsMasthead() {
         className="absolute -inset-[10%]"
         style={{
           background:
-            "radial-gradient(circle at 32% 42%, rgba(201, 168, 124, 0.18), transparent 52%)",
+            "radial-gradient(circle at 32% 42%, rgba(124, 91, 216, 0.16), transparent 52%)",
           filter: "blur(80px)",
         }}
       />
@@ -92,7 +92,7 @@ export default function BeatsMasthead() {
         className="absolute -inset-[10%] opacity-50"
         style={{
           background:
-            "radial-gradient(circle at 70% 62%, rgba(122, 90, 116, 0.16), transparent 60%)",
+            "radial-gradient(circle at 70% 62%, rgba(124, 91, 216, 0.10), transparent 60%)",
           filter: "blur(110px)",
         }}
       />

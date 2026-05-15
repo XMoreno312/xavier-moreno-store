@@ -34,7 +34,7 @@ const faqs = [
 export default function LicensingPage() {
   return (
     <div className="mx-auto max-w-4xl px-4 py-10 sm:px-6 sm:py-14">
-      <p className="text-xs uppercase tracking-[0.25em] text-gold">Licensing</p>
+      <p className="text-xs uppercase tracking-[0.25em] text-iris">Licensing</p>
       <h1 className="mt-3 font-display text-4xl leading-tight text-cream sm:text-5xl">
         Clear terms, <br className="hidden sm:block" />
         no small print games.
@@ -65,7 +65,7 @@ export default function LicensingPage() {
             <ul className="mt-5 flex-1 space-y-2 text-sm text-cream/80">
               {tier.rights.map((r) => (
                 <li key={r} className="flex gap-3">
-                  <span className="mt-[7px] h-[5px] w-[5px] flex-shrink-0 rounded-full bg-gold" />
+                  <span className="mt-[7px] h-[5px] w-[5px] flex-shrink-0 rounded-full bg-iris shadow-[0_0_6px_rgba(124,91,216,0.55)]" />
                   <span>{r}</span>
                 </li>
               ))}
@@ -75,8 +75,8 @@ export default function LicensingPage() {
               className={[
                 "mt-6 block rounded-md px-4 py-3 text-center text-xs uppercase tracking-[0.2em] transition-colors",
                 tier.id === "exclusive"
-                  ? "border border-gold/60 text-gold hover:bg-gold hover:text-ink"
-                  : "bg-gold text-ink hover:bg-cream",
+                  ? "border border-iris/60 text-iris hover:bg-iris hover:text-bone hover:shadow-[0_0_22px_rgba(124,91,216,0.30)]"
+                  : "bg-iris text-bone hover:bg-iris-deep hover:shadow-[0_0_22px_rgba(124,91,216,0.35)]",
               ].join(" ")}
             >
               {tier.id === "exclusive"
@@ -180,7 +180,7 @@ export default function LicensingPage() {
           in the{" "}
           <Link
             href="/license-agreement"
-            className="text-gold underline decoration-gold/30 underline-offset-2 hover:text-cream hover:decoration-cream/50"
+            className="text-iris underline decoration-iris/40 underline-offset-2 hover:text-iris-mist hover:decoration-iris-mist/60"
           >
             License Agreement
           </Link>

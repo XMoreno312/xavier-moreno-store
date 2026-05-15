@@ -36,21 +36,21 @@ export default function HeroCTA({ onExit, disabled = false, delay = 3.8 }) {
           "px-7 py-3 text-[10.5px] text-bone/90 sm:text-[11px]",
           "border border-bone/20 bg-transparent",
           "transition-all duration-[700ms] ease-out",
-          "hover:text-bone hover:border-bone/45",
+          "hover:text-bone hover:border-iris/55",
           "disabled:cursor-default disabled:opacity-60",
         ].join(" ")}
         style={{
           letterSpacing: "0.38em",
           textTransform: "uppercase",
           fontWeight: 300,
-          boxShadow: "0 0 0 rgba(239,233,221,0)",
+          boxShadow: "0 0 0 rgba(124,91,216,0)",
         }}
         onMouseEnter={(e) => {
           e.currentTarget.style.boxShadow =
-            "0 0 28px rgba(239,233,221,0.12)";
+            "0 0 28px rgba(124,91,216,0.30)";
         }}
         onMouseLeave={(e) => {
-          e.currentTarget.style.boxShadow = "0 0 0 rgba(239,233,221,0)";
+          e.currentTarget.style.boxShadow = "0 0 0 rgba(124,91,216,0)";
         }}
       >
         License a Production

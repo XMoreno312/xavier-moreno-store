@@ -18,8 +18,8 @@ export default function ContactForm() {
 
   if (submitted) {
     return (
-      <div className="rounded-xl border border-gold/40 bg-gold/5 p-6 text-center">
-        <p className="text-xs uppercase tracking-[0.25em] text-gold">Thanks</p>
+      <div className="rounded-xl border border-iris/40 bg-iris/5 p-6 text-center">
+        <p className="text-xs uppercase tracking-[0.25em] text-iris">Thanks</p>
         <p className="mt-2 font-display text-xl text-cream">
           Message received — I&apos;ll get back to you shortly.
         </p>
@@ -32,7 +32,7 @@ export default function ContactForm() {
       onSubmit={handleSubmit}
       className="rounded-xl border border-cream/10 bg-ink/40 p-6 sm:p-8"
     >
-      <p className="text-xs uppercase tracking-[0.25em] text-gold">
+      <p className="text-xs uppercase tracking-[0.25em] text-iris">
         Get in touch
       </p>
       <h3 className="mt-2 font-display text-2xl text-cream">
@@ -104,7 +104,7 @@ export default function ContactForm() {
 
       <button
         type="submit"
-        className="mt-7 w-full rounded-md bg-gold px-4 py-3 text-xs uppercase tracking-[0.25em] text-ink transition-colors hover:bg-cream sm:w-auto sm:px-8"
+        className="mt-7 w-full rounded-md bg-iris px-4 py-3 text-xs uppercase tracking-[0.25em] text-bone transition-[background-color,box-shadow] hover:bg-iris-deep hover:shadow-[0_0_24px_rgba(124,91,216,0.35)] sm:w-auto sm:px-8"
       >
         Send message
       </button>
@@ -115,7 +115,7 @@ export default function ContactForm() {
 const inputStyles = [
   "block w-full rounded-md border border-cream/15 bg-ink/60 px-3.5 py-2.5",
   "text-sm text-cream placeholder:text-cream/30",
-  "transition-colors focus:border-gold/70 focus:outline-none focus:ring-1 focus:ring-gold/40",
+  "transition-colors focus:border-iris/70 focus:outline-none focus:ring-1 focus:ring-iris/40",
 ].join(" ");
 
 function Field({ label, htmlFor, children }) {

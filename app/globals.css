@@ -41,7 +41,7 @@ input[type="range"].progress {
   -webkit-appearance: none;
   appearance: none;
   height: 1px;
-  background: rgba(239, 233, 221, 0.14);
+  background: linear-gradient(90deg, rgba(124, 91, 216, 0.25), rgba(239, 233, 221, 0.12));
   border-radius: 999px;
   outline: none;
   cursor: pointer;
@@ -52,15 +52,17 @@ input[type="range"].progress::-webkit-slider-thumb {
   width: 8px;
   height: 8px;
   border-radius: 999px;
-  background: #EFE9DD;
+  background: #7C5BD8;
   cursor: pointer;
   border: 0;
+  box-shadow: 0 0 8px rgba(124, 91, 216, 0.55);
 }
 input[type="range"].progress::-moz-range-thumb {
   width: 8px;
   height: 8px;
   border-radius: 999px;
-  background: #EFE9DD;
+  background: #7C5BD8;
   cursor: pointer;
   border: 0;
+  box-shadow: 0 0 8px rgba(124, 91, 216, 0.55);
 }

@@ -21,7 +21,7 @@ export default function TierDrawer({ beat, open, onSelect }) {
           {LICENSE_TIERS.map((tier) => (
             <div
               key={tier.id}
-              className="flex flex-col justify-between rounded-lg border border-cream/10 bg-ink/40 p-4 transition-colors hover:border-gold/40"
+              className="flex flex-col justify-between rounded-lg border border-cream/10 bg-ink/40 p-4 transition-[border-color,box-shadow] hover:border-iris/50 hover:shadow-[0_0_18px_rgba(124,91,216,0.18)]"
             >
               <div>
                 <p className="text-[11px] uppercase tracking-[0.2em] text-cream/50">
@@ -37,8 +37,8 @@ export default function TierDrawer({ beat, open, onSelect }) {
                 className={[
                   "mt-4 w-full rounded-md px-3 py-2 text-xs uppercase tracking-[0.2em] transition-colors",
                   tier.id === "exclusive"
-                    ? "border border-gold/60 text-gold hover:bg-gold hover:text-ink"
-                    : "bg-gold text-ink hover:bg-cream",
+                    ? "border border-iris/60 text-iris hover:bg-iris hover:text-bone hover:shadow-[0_0_18px_rgba(124,91,216,0.28)]"
+                    : "bg-iris text-bone hover:bg-iris-deep hover:shadow-[0_0_18px_rgba(124,91,216,0.30)]",
                 ].join(" ")}
               >
                 {tier.id === "exclusive" ? "Contact" : "Add to Cart"}

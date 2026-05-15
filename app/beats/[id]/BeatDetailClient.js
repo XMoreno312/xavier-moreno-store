@@ -265,7 +265,7 @@ export default function BeatDetailClient({ beat, tiers, releaseNo }) {
                       ? `Restart ${beat.title}`
                       : "Previous production"
                   }
-                  className="group flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full border border-bone/30 bg-transparent text-bone/85 transition-[border-color,background-color,color,box-shadow] duration-200 hover:border-bone/60 hover:text-bone hover:shadow-[0_0_18px_rgba(239,233,221,0.10)]"
+                  className="group flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full border border-bone/30 bg-transparent text-bone/85 transition-[border-color,background-color,color,box-shadow] duration-200 hover:border-iris/65 hover:text-bone hover:shadow-[0_0_18px_rgba(124,91,216,0.30)]"
                   style={{ transitionTimingFunction: EASE_SNAP }}
                 >
                   {isReplayMode ? (
@@ -318,7 +318,7 @@ export default function BeatDetailClient({ beat, tiers, releaseNo }) {
                       ? "cursor-default border-bone/15 bg-transparent text-bone/35"
                       : "border-bone/30 bg-transparent text-bone hover:border-bone hover:bg-bone hover:text-stage",
                     playingThis && !erroredThis
-                      ? "border-bone/60 shadow-[0_0_36px_rgba(239,233,221,0.16)]"
+                      ? "border-iris/60 shadow-[0_0_36px_rgba(124,91,216,0.28)]"
                       : "",
                   ].join(" ")}
                   style={{ transitionTimingFunction: "cubic-bezier(0.22, 0.6, 0.24, 1)" }}
@@ -329,7 +329,7 @@ export default function BeatDetailClient({ beat, tiers, releaseNo }) {
                       aria-hidden
                       className="pointer-events-none absolute inset-[-6px] rounded-full"
                       style={{
-                        boxShadow: "0 0 0 1px rgba(239,233,221,0.22)",
+                        boxShadow: "0 0 0 1px rgba(124,91,216,0.45)",
                         animation:
                           "xm-detail-pulse 2.4s cubic-bezier(0.22, 0.6, 0.24, 1) infinite",
                       }}
@@ -386,7 +386,7 @@ export default function BeatDetailClient({ beat, tiers, releaseNo }) {
                   type="button"
                   onClick={handleNext}
                   aria-label="Next production"
-                  className="group flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full border border-bone/30 bg-transparent text-bone/85 transition-[border-color,background-color,color,box-shadow] duration-200 hover:border-bone/60 hover:text-bone hover:shadow-[0_0_18px_rgba(239,233,221,0.10)]"
+                  className="group flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full border border-bone/30 bg-transparent text-bone/85 transition-[border-color,background-color,color,box-shadow] duration-200 hover:border-iris/65 hover:text-bone hover:shadow-[0_0_18px_rgba(124,91,216,0.30)]"
                   style={{ transitionTimingFunction: EASE_SNAP }}
                 >
                   {/* Skip-forward: triangle pointing right + vertical bar. */}
@@ -421,7 +421,7 @@ export default function BeatDetailClient({ beat, tiers, releaseNo }) {
                 >
                   <span
                     aria-hidden
-                    className="block h-px bg-bone/85 transition-[width] duration-200 ease-linear"
+                    className="block h-px bg-iris shadow-[0_0_6px_rgba(124,91,216,0.55)] transition-[width] duration-200 ease-linear"
                     style={{ width: `${visualProgress * 100}%` }}
                   />
                 </button>
@@ -454,7 +454,7 @@ export default function BeatDetailClient({ beat, tiers, releaseNo }) {
                       type="button"
                       onClick={handleScrollToLicense}
                       aria-label="Jump to licensing options"
-                      className="border border-[rgba(239,233,221,0.3)] bg-[rgba(239,233,221,0.04)] px-4 py-2 text-[10px] text-bone transition-[border-color,background-color,box-shadow] duration-200 hover:border-[rgba(239,233,221,0.6)] hover:bg-[rgba(239,233,221,0.07)] hover:shadow-[0_0_18px_rgba(239,233,221,0.10)]"
+                      className="border border-iris/35 bg-iris/[0.04] px-4 py-2 text-[10px] text-bone transition-[border-color,background-color,box-shadow,color] duration-200 hover:border-iris/70 hover:bg-iris/[0.10] hover:text-bone hover:shadow-[0_0_18px_rgba(124,91,216,0.30)]"
                       style={{
                         letterSpacing: "0.32em",
                         textTransform: "uppercase",
@@ -518,8 +518,8 @@ export default function BeatDetailClient({ beat, tiers, releaseNo }) {
                         className={[
                           "h-[7px] w-[7px] rounded-full border transition-all duration-[700ms]",
                           active
-                            ? "border-bone bg-bone"
-                            : "border-bone/25 bg-transparent group-hover:border-bone/55",
+                            ? "border-iris bg-iris shadow-[0_0_10px_rgba(124,91,216,0.55)]"
+                            : "border-bone/25 bg-transparent group-hover:border-iris/55",
                         ].join(" ")}
                       />
                       <span>
@@ -618,7 +618,7 @@ export default function BeatDetailClient({ beat, tiers, releaseNo }) {
                   ? "Please agree to the License Agreement and Terms of Service first."
                   : undefined
               }
-              className="group mt-7 inline-flex items-center gap-4 border border-bone/25 px-7 py-4 text-[10px] text-bone transition-colors duration-[700ms] hover:border-bone hover:bg-bone hover:text-stage disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:border-bone/25 disabled:hover:bg-transparent disabled:hover:text-bone"
+              className="group mt-7 inline-flex items-center gap-4 border border-iris/45 bg-iris/[0.04] px-7 py-4 text-[10px] text-bone transition-[border-color,background-color,color,box-shadow] duration-[700ms] hover:border-iris hover:bg-iris hover:text-bone hover:shadow-[0_0_36px_rgba(124,91,216,0.30)] disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:border-iris/45 disabled:hover:bg-iris/[0.04] disabled:hover:text-bone disabled:hover:shadow-none"
               style={{
                 letterSpacing: "0.38em",
                 textTransform: "uppercase",
@@ -685,15 +685,15 @@ export default function BeatDetailClient({ beat, tiers, releaseNo }) {
       <style jsx>{`
         @keyframes xm-detail-pulse {
           0% {
-            box-shadow: 0 0 0 1px rgba(239, 233, 221, 0.22);
+            box-shadow: 0 0 0 1px rgba(124, 91, 216, 0.45);
             opacity: 0.85;
           }
           50% {
-            box-shadow: 0 0 32px rgba(239, 233, 221, 0.14);
+            box-shadow: 0 0 36px rgba(124, 91, 216, 0.30);
             opacity: 1;
           }
           100% {
-            box-shadow: 0 0 0 1px rgba(239, 233, 221, 0.22);
+            box-shadow: 0 0 0 1px rgba(124, 91, 216, 0.45);
             opacity: 0.85;
           }
         }

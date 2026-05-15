@@ -164,7 +164,7 @@ export default function ProductionCard({
           ref={coverRef}
           onMouseMove={handleMouseMove}
           onMouseLeave={handleMouseLeave}
-          className="relative overflow-hidden border border-bone/10 transition-[border-color,box-shadow] duration-[900ms] group-hover:border-bone/30 group-hover:shadow-[0_0_60px_rgba(239,233,221,0.08)]"
+          className="relative overflow-hidden border border-bone/10 transition-[border-color,box-shadow] duration-[900ms] group-hover:border-iris/40 group-hover:shadow-[0_0_60px_rgba(124,91,216,0.25)]"
           style={{ transitionTimingFunction: "cubic-bezier(0.22, 1, 0.36, 1)" }}
           whileHover={{ scale: 1.015 }}
           transition={{ duration: 1.2, ease: EASE_SILK }}
@@ -193,7 +193,7 @@ export default function ProductionCard({
               style={{
                 width: 120,
                 height: 44,
-                boxShadow: "0 0 0 1px rgba(239,233,221,0.18)",
+                boxShadow: "0 0 0 1px rgba(124,91,216,0.32)",
                 animation: "xm-preview-pulse 2.4s cubic-bezier(0.22, 1, 0.36, 1) infinite",
               }}
             />
@@ -212,8 +212,8 @@ export default function ProductionCard({
               erroredThis
                 ? "opacity-100 scale-100 cursor-default border-bone/15 bg-black/30 text-bone/45"
                 : playingThis
-                  ? "opacity-100 scale-110 bg-black/55 border-bone/50 shadow-[0_0_40px_rgba(239,233,221,0.18)]"
-                  : "opacity-0 scale-100 group-hover:opacity-100 group-hover:scale-110 group-hover:shadow-[0_0_40px_rgba(239,233,221,0.18)] focus:opacity-100 focus:scale-110",
+                  ? "opacity-100 scale-110 bg-black/55 border-iris/60 shadow-[0_0_40px_rgba(124,91,216,0.40)]"
+                  : "opacity-0 scale-100 group-hover:opacity-100 group-hover:scale-110 group-hover:shadow-[0_0_40px_rgba(124,91,216,0.40)] focus:opacity-100 focus:scale-110",
             ].join(" ")}
             style={{ transitionTimingFunction: "cubic-bezier(0.22, 1, 0.36, 1)" }}
           >

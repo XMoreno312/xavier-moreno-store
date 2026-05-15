@@ -47,7 +47,7 @@ export default function AudioPlayerBar() {
         <button
           onClick={togglePlay}
           aria-label={isPlaying ? "Pause" : "Play"}
-          className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full border border-bone/30 text-bone/85 transition-colors duration-500 hover:border-bone hover:text-bone"
+          className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full border border-bone/30 text-bone/85 transition-[border-color,color,box-shadow] duration-500 hover:border-iris/70 hover:text-bone hover:shadow-[0_0_14px_rgba(124,91,216,0.28)]"
         >
           {isPlaying ? (
             <svg viewBox="0 0 24 24" className="h-3 w-3" fill="currentColor" aria-hidden>
@@ -115,7 +115,7 @@ export default function AudioPlayerBar() {
           type="button"
           onClick={handleLicense}
           aria-label={`Jump to licensing options for ${currentBeat.title}`}
-          className="flex-shrink-0 border border-[rgba(239,233,221,0.3)] bg-[rgba(239,233,221,0.04)] px-3 py-1.5 text-[10px] text-bone transition-[border-color,background-color,box-shadow] duration-200 hover:border-[rgba(239,233,221,0.6)] hover:bg-[rgba(239,233,221,0.07)] hover:shadow-[0_0_18px_rgba(239,233,221,0.10)] sm:px-4 sm:py-2"
+          className="flex-shrink-0 border border-iris/35 bg-iris/[0.04] px-3 py-1.5 text-[10px] text-bone transition-[border-color,background-color,box-shadow,color] duration-200 hover:border-iris/70 hover:bg-iris/[0.10] hover:text-bone hover:shadow-[0_0_18px_rgba(124,91,216,0.30)] sm:px-4 sm:py-2"
           style={{
             letterSpacing: "0.28em",
             textTransform: "uppercase",
@@ -130,7 +130,7 @@ export default function AudioPlayerBar() {
       {/* Thin mobile progress — a single hairline at the bar's bottom */}
       <div className="h-px w-full bg-bone/10 sm:hidden">
         <div
-          className="h-full bg-bone/70 transition-[width] duration-200"
+          className="h-full bg-iris shadow-[0_0_8px_rgba(124,91,216,0.55)] transition-[width] duration-200"
           style={{ width: `${progress * 100}%` }}
         />
       </div>

@@ -266,18 +266,18 @@ function SubmitButton({ submitting }) {
         fontSize: "11px",
         fontWeight: 300,
         opacity: submitting ? 0.6 : 1,
-        boxShadow: "0 0 0 rgba(239,233,221,0)",
+        boxShadow: "0 0 0 rgba(124,91,216,0)",
       }}
       onMouseEnter={(e) => {
         if (submitting) return;
         e.currentTarget.style.borderColor = "rgba(239, 233, 221, 0.6)";
         e.currentTarget.style.backgroundColor = "rgba(239, 233, 221, 0.08)";
-        e.currentTarget.style.boxShadow = "0 0 40px rgba(239,233,221,0.15)";
+        e.currentTarget.style.boxShadow = "0 0 40px rgba(124,91,216,0.32)";
       }}
       onMouseLeave={(e) => {
         e.currentTarget.style.borderColor = "rgba(239, 233, 221, 0.3)";
         e.currentTarget.style.backgroundColor = "rgba(239, 233, 221, 0.04)";
-        e.currentTarget.style.boxShadow = "0 0 0 rgba(239,233,221,0)";
+        e.currentTarget.style.boxShadow = "0 0 0 rgba(124,91,216,0)";
       }}
     >
       {submitting ? "Sending…" : "Submit Application"}
