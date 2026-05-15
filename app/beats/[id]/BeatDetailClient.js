@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import { useAudioPlayer } from "@/components/AudioPlayerProvider";
@@ -52,6 +53,10 @@ export default function BeatDetailClient({ beat, tiers, releaseNo }) {
 
   const [checkoutBusy, setCheckoutBusy] = useState(false);
   const [checkoutError, setCheckoutError] = useState(null);
+  // Required click-wrap agreement gating the primary CTA. Resets per
+  // page load so the buyer reaffirms each visit. We keep it false even
+  // on tier switches so the affirmation persists across selections.
+  const [agreedToTerms, setAgreedToTerms] = useState(false);
 
   const handleLicense = async () => {
     if (selected.id === "exclusive") {
@@ -486,8 +491,13 @@ export default function BeatDetailClient({ beat, tiers, releaseNo }) {
               Choose a license.
             </h2>
             <p className="mt-5 max-w-md text-[13px] leading-[1.7] text-bone/55">
-              All leases are delivered untagged. An exclusive removes the
-              production from the catalogue and transfers master use rights.
+              Every purchase is a license to use the production — not a
+              transfer of ownership. All leases are delivered untagged. An
+              exclusive license grants exclusive usage rights for one released
+              recording; the production is removed from the catalogue once the
+              exclusive is completed. Xavier Moreno retains ownership,
+              copyright, authorship, publishing interest, producer rights, and
+              all intellectual property in the original production.
             </p>
 
             {/* Tier selector — editorial, not storefront. More vertical rhythm,
@@ -559,11 +569,56 @@ export default function BeatDetailClient({ beat, tiers, releaseNo }) {
               </ul>
             </div>
 
-            {/* Primary CTA — editorial, single line, slower transition */}
+            {/* Click-wrap agreement — visitor must affirm the license terms
+                before the primary CTA becomes active. The longer affirmation
+                lives inside the checkbox label; the shorter informational
+                line sits beneath the CTA. */}
+            <div className="mt-12 max-w-md">
+              <label className="group flex cursor-pointer items-start gap-3">
+                <input
+                  type="checkbox"
+                  checked={agreedToTerms}
+                  onChange={(e) => setAgreedToTerms(e.target.checked)}
+                  className="mt-[3px] h-4 w-4 flex-shrink-0 cursor-pointer accent-bone"
+                  aria-describedby="license-agreement-text"
+                />
+                <span
+                  id="license-agreement-text"
+                  className="text-[12px] leading-[1.65] text-bone/75"
+                >
+                  I agree to the{" "}
+                  <Link
+                    href="/license-agreement"
+                    className="underline decoration-bone/35 underline-offset-2 transition-colors hover:text-bone hover:decoration-bone"
+                  >
+                    License Agreement
+                  </Link>
+                  {" "}and{" "}
+                  <Link
+                    href="/terms-of-service"
+                    className="underline decoration-bone/35 underline-offset-2 transition-colors hover:text-bone hover:decoration-bone"
+                  >
+                    Terms of Service
+                  </Link>
+                  . I understand that I am purchasing usage rights only and
+                  that ownership of the original production remains with
+                  Xavier Moreno.
+                </span>
+              </label>
+            </div>
+
+            {/* Primary CTA — editorial, single line, slower transition.
+                Disabled until the buyer affirms the license agreement above. */}
             <button
               onClick={handleLicense}
-              disabled={checkoutBusy}
-              className="group mt-14 inline-flex items-center gap-4 border border-bone/25 px-7 py-4 text-[10px] text-bone transition-colors duration-[700ms] hover:border-bone hover:bg-bone hover:text-stage disabled:cursor-default disabled:opacity-60"
+              disabled={checkoutBusy || !agreedToTerms}
+              aria-disabled={checkoutBusy || !agreedToTerms}
+              title={
+                !agreedToTerms
+                  ? "Please agree to the License Agreement and Terms of Service first."
+                  : undefined
+              }
+              className="group mt-7 inline-flex items-center gap-4 border border-bone/25 px-7 py-4 text-[10px] text-bone transition-colors duration-[700ms] hover:border-bone hover:bg-bone hover:text-stage disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:border-bone/25 disabled:hover:bg-transparent disabled:hover:text-bone"
               style={{
                 letterSpacing: "0.38em",
                 textTransform: "uppercase",
@@ -573,8 +628,8 @@ export default function BeatDetailClient({ beat, tiers, releaseNo }) {
               {checkoutBusy
                 ? "Opening Checkout…"
                 : selected.id === "exclusive"
-                  ? "Inquire for Exclusive"
-                  : "License This Production"}
+                  ? "Inquire for Exclusive License"
+                  : "Purchase a License"}
               <span
                 aria-hidden
                 className="transition-transform duration-[700ms] group-hover:translate-x-1"
@@ -583,6 +638,28 @@ export default function BeatDetailClient({ beat, tiers, releaseNo }) {
                 →
               </span>
             </button>
+
+            {/* Plain-English reminder beneath the CTA. Mirrors the formal
+                language inside the checkbox above so it reads correctly even
+                when scanning. */}
+            <p className="mt-5 max-w-md text-[11px] leading-[1.7] text-silver/75">
+              By purchasing, you agree to the{" "}
+              <Link
+                href="/license-agreement"
+                className="underline decoration-silver/30 underline-offset-2 transition-colors hover:text-bone hover:decoration-bone/60"
+              >
+                License Agreement
+              </Link>
+              {" "}and{" "}
+              <Link
+                href="/terms-of-service"
+                className="underline decoration-silver/30 underline-offset-2 transition-colors hover:text-bone hover:decoration-bone/60"
+              >
+                Terms of Service
+              </Link>
+              . All rights not expressly granted are reserved by Xavier Moreno.
+            </p>
+
             {checkoutError ? (
               <p className="mt-5 max-w-md text-[12px] text-silver">
                 {checkoutError}

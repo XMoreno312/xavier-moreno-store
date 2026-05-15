@@ -5,25 +5,29 @@ import ContactForm from "./ContactForm";
 export const metadata = {
   title: "Licensing — Xavier Moreno",
   description:
-    "Understand the MP3 lease, WAV lease, and exclusive rights terms for beats by Xavier Moreno.",
+    "Understand the MP3 lease, WAV lease, and exclusive license terms for productions by Xavier Moreno.",
 };
 
 const faqs = [
   {
     q: "Do I have to credit you?",
-    a: "Yes. All leases require producer credit in the song metadata and anywhere the song appears — something like “prod. Xavier Moreno.” Exclusive deals can be negotiated.",
+    a: "Yes. Every license requires producer credit — “Produced by Xavier Moreno” — in song metadata and anywhere the song appears (album notes, streaming-platform credits, video descriptions, etc.). Exclusive terms can be negotiated.",
   },
   {
-    q: "Can multiple artists license the same beat?",
-    a: "Yes, leases are non-exclusive. The same beat may be licensed by several artists until someone purchases an exclusive, at which point the beat is removed from the store.",
+    q: "Can multiple artists license the same production?",
+    a: "Yes. MP3 and WAV leases are non-exclusive — the same production may be licensed by several artists until someone completes an exclusive license, at which point the production is removed from the catalogue and no further non-exclusive licenses are sold.",
   },
   {
     q: "What happens when I hit my stream cap?",
     a: "You can upgrade your license at any time — reach out and we’ll credit what you’ve already paid toward the next tier.",
   },
   {
-    q: "How do I buy an exclusive?",
-    a: "Use the contact form below and select the beat title. Exclusive pricing varies per beat based on production depth and current interest.",
+    q: "How do I purchase an exclusive license?",
+    a: "Use the contact form below and select the production title. Exclusive pricing varies per production based on production depth and current interest. Final exclusive terms must be confirmed in writing before delivery.",
+  },
+  {
+    q: "Does any license transfer ownership?",
+    a: "No. Every purchase is a license to use the production. Xavier Moreno retains ownership, copyright, authorship, publishing interest, producer rights, stems, melodies, arrangements, and all intellectual property in the original production. All rights not expressly granted are reserved.",
   },
 ];
 
@@ -36,8 +40,10 @@ export default function LicensingPage() {
         no small print games.
       </h1>
       <p className="mt-4 max-w-2xl text-sm leading-relaxed text-cream/60 sm:text-base">
-        Every beat is offered under three straightforward licenses. Pick the one
-        that matches how you plan to release. Upgrade any time.
+        Every production is offered under three straightforward licenses. Pick
+        the one that matches how you plan to release — upgrade any time.
+        Every purchase is a license to use the production, not a transfer of
+        ownership.
       </p>
 
       {/* Tiers */}
@@ -65,7 +71,7 @@ export default function LicensingPage() {
               ))}
             </ul>
             <Link
-              href="/"
+              href={tier.id === "exclusive" ? "/work-with-me" : "/beats"}
               className={[
                 "mt-6 block rounded-md px-4 py-3 text-center text-xs uppercase tracking-[0.2em] transition-colors",
                 tier.id === "exclusive"
@@ -73,14 +79,38 @@ export default function LicensingPage() {
                   : "bg-gold text-ink hover:bg-cream",
               ].join(" ")}
             >
-              {tier.id === "exclusive" ? "Browse beats" : "Shop beats"}
+              {tier.id === "exclusive"
+                ? "Inquire for exclusive license"
+                : "License a production"}
             </Link>
           </div>
         ))}
       </section>
 
+      {/* Ownership-retention notice — the most important line on the page */}
+      <section className="mt-8 flex items-start gap-4 rounded-xl border border-cream/15 bg-cream/[0.04] p-5 sm:p-6">
+        <span
+          aria-hidden="true"
+          className="mt-[2px] flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-full border border-cream/30 text-xs font-medium text-cream/80"
+        >
+          ©
+        </span>
+        <div>
+          <p className="text-[11px] uppercase tracking-[0.25em] text-cream/70">
+            Ownership retained
+          </p>
+          <p className="mt-2 text-sm leading-relaxed text-cream/80 sm:text-base">
+            Buyers are purchasing a license, not ownership. Xavier Moreno
+            retains 100% of the copyright, authorship, publishing interest,
+            producer rights, stems, melodies, arrangements, recordings, and
+            all intellectual property connected to the original production.
+            All rights not expressly granted are reserved.
+          </p>
+        </div>
+      </section>
+
       {/* Language restriction notice */}
-      <section className="mt-8 flex items-start gap-4 rounded-xl border border-gold/40 bg-gold/[0.04] p-5 sm:p-6">
+      <section className="mt-6 flex items-start gap-4 rounded-xl border border-gold/40 bg-gold/[0.04] p-5 sm:p-6">
         <span
           aria-hidden="true"
           className="mt-[2px] flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-full border border-gold/60 text-xs font-medium text-gold"
@@ -92,9 +122,10 @@ export default function LicensingPage() {
             Language restriction
           </p>
           <p className="mt-2 text-sm leading-relaxed text-cream/80 sm:text-base">
-            All leases are restricted to Spanish-language and regional Mexican
-            music releases only. English-language use is not permitted under
-            any lease tier. For exceptions contact us directly.
+            All licenses are restricted to Spanish-language and regional
+            Mexican music releases only. English-language use is not
+            permitted under any license tier. For exceptions contact us
+            directly.
           </p>
         </div>
       </section>
@@ -115,10 +146,11 @@ export default function LicensingPage() {
             <tbody className="divide-y divide-cream/10 text-cream/80">
               {[
                 ["File delivery", "MP3 320", "WAV + MP3", "WAV + Stems"],
-                ["Stream cap", "10k", "50k", "Unlimited"],
+                ["Stream cap", "10k", "50k", "Unlimited (one release)"],
                 ["YouTube monetization", "—", "✓", "✓"],
-                ["Beat stays in store", "✓", "✓", "—"],
+                ["Production stays in catalogue", "✓", "✓", "—"],
                 ["Producer credit required", "✓", "✓", "✓"],
+                ["Ownership transferred", "—", "—", "—"],
               ].map((row) => (
                 <tr key={row[0]}>
                   {row.map((cell, i) => (
@@ -140,6 +172,65 @@ export default function LicensingPage() {
         </div>
       </section>
 
+      {/* Prohibited use */}
+      <section className="mt-16">
+        <h2 className="font-display text-2xl text-cream">What you can&rsquo;t do</h2>
+        <p className="mt-4 max-w-2xl text-sm leading-relaxed text-cream/60">
+          The points below apply to every license tier and are listed in full
+          in the{" "}
+          <Link
+            href="/license-agreement"
+            className="text-gold underline decoration-gold/30 underline-offset-2 hover:text-cream hover:decoration-cream/50"
+          >
+            License Agreement
+          </Link>
+          .
+        </p>
+        <ul className="mt-5 space-y-3 text-sm text-cream/80">
+          {[
+            "Resell, redistribute, lease, sublicense, upload, or give away the instrumental by itself.",
+            "Claim that you created, produced, composed, or own the original production.",
+            "Register the beat or instrumental as your own copyright.",
+            "Use the instrumental for Content ID claims against Xavier Moreno or other licensees.",
+            "Upload the instrumental to sample packs, stock music libraries, beat stores, NFTs, or AI training datasets without prior written permission.",
+          ].map((line) => (
+            <li key={line} className="flex gap-3">
+              <span className="mt-[7px] h-[5px] w-[5px] flex-shrink-0 rounded-full bg-cream/40" />
+              <span>{line}</span>
+            </li>
+          ))}
+        </ul>
+      </section>
+
+      {/* Refunds & payments — short version, full version in Terms */}
+      <section className="mt-16">
+        <h2 className="font-display text-2xl text-cream">Refunds &amp; payment</h2>
+        <ul className="mt-5 space-y-3 text-sm text-cream/80">
+          <li className="flex gap-3">
+            <span className="mt-[7px] h-[5px] w-[5px] flex-shrink-0 rounded-full bg-cream/40" />
+            <span>
+              Digital products are generally non-refundable once delivered,
+              unless there is a technical issue with the file or a duplicate
+              charge.
+            </span>
+          </li>
+          <li className="flex gap-3">
+            <span className="mt-[7px] h-[5px] w-[5px] flex-shrink-0 rounded-full bg-cream/40" />
+            <span>
+              Payments are processed securely through Stripe (the site&rsquo;s
+              payment processor).
+            </span>
+          </li>
+          <li className="flex gap-3">
+            <span className="mt-[7px] h-[5px] w-[5px] flex-shrink-0 rounded-full bg-cream/40" />
+            <span>
+              The buyer is responsible for entering correct contact and
+              delivery information at checkout.
+            </span>
+          </li>
+        </ul>
+      </section>
+
       {/* FAQ */}
       <section className="mt-16">
         <h2 className="font-display text-2xl text-cream">FAQ</h2>
@@ -155,6 +246,11 @@ export default function LicensingPage() {
           ))}
         </div>
       </section>
+
+      {/* Disclaimer */}
+      <p className="mt-12 text-xs italic text-cream/45">
+        This is not legal advice. For legal questions, consult an attorney.
+      </p>
 
       <section className="mt-16">
         <ContactForm />
