@@ -1,12 +1,18 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import { useAudioPlayer } from "@/components/AudioPlayerProvider";
 import CoverStill from "@/components/beats/CoverStill";
+import { getAdjacentBeat } from "@/lib/collection";
 
 // Same curve as the landing + masthead + cards — one vocabulary.
 const EASE_SILK = [0.22, 0.6, 0.24, 1];
+// Slightly snappier easing for transport hover states — these are
+// utilitarian controls, so the response should feel immediate rather
+// than the long, editorial 700ms used elsewhere on the page.
+const EASE_SNAP = "cubic-bezier(0.22, 1, 0.36, 1)";
 
 function formatTime(seconds) {
   if (!seconds || Number.isNaN(seconds) || !Number.isFinite(seconds)) return "0:00";
@@ -16,6 +22,7 @@ function formatTime(seconds) {
 }
 
 export default function BeatDetailClient({ beat, tiers, releaseNo }) {
+  const router = useRouter();
   const {
     currentBeat,
     isPlaying,
@@ -88,11 +95,43 @@ export default function BeatDetailClient({ beat, tiers, releaseNo }) {
     seek(ratio);
   };
 
+  // Current playback position in seconds — only meaningful when this
+  // beat is the one actually playing in the provider. Used by the
+  // prev/replay logic below to decide between "restart" and "navigate".
+  const currentTime = isCurrent && duration ? duration * progress : 0;
+
+  // Spotify-style behavior: if we're more than 3 seconds into the
+  // current track, the prev button restarts it. Otherwise it steps to
+  // the previous production in the catalogue.
+  const handlePrev = () => {
+    if (isCurrent && currentTime > 3) {
+      seek(0);
+      return;
+    }
+    const prev = getAdjacentBeat(beat.id, "prev");
+    router.push(`/beats/${prev.id}`);
+  };
+
+  const handleNext = () => {
+    const next = getAdjacentBeat(beat.id, "next");
+    router.push(`/beats/${next.id}`);
+  };
+
+  const handleScrollToLicense = () => {
+    if (typeof document === "undefined") return;
+    const el = document.getElementById("license");
+    if (el) {
+      el.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+  };
+
   // Progress is 0..1 globally, but only reflects this beat when it's
   // current — otherwise the bar should sit empty regardless of what
   // else is playing.
   const visualProgress = isCurrent ? progress : 0;
   const elapsed = isCurrent && duration ? duration * progress : 0;
+
+  const isReplayMode = isCurrent && currentTime > 3;
 
   return (
     <motion.article
@@ -210,90 +249,153 @@ export default function BeatDetailClient({ beat, tiers, releaseNo }) {
               Preview
             </p>
 
-            <div className="mt-5 flex items-center gap-6 sm:gap-7">
-              <button
-                type="button"
-                onClick={handlePreview}
-                disabled={erroredThis}
-                aria-label={
-                  erroredThis
-                    ? `Preview not yet available for ${beat.title}`
-                    : playingThis
-                      ? `Pause preview of ${beat.title}`
-                      : loadingThis
-                        ? `Loading preview of ${beat.title}`
-                        : `Play preview of ${beat.title}`
-                }
-                title={erroredThis ? "Not yet — coming soon" : undefined}
-                className={[
-                  "group relative flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full border transition-[border-color,background-color,color,box-shadow,transform] duration-[700ms] sm:h-14 sm:w-14",
-                  erroredThis
-                    ? "cursor-default border-bone/15 bg-transparent text-bone/35"
-                    : "border-bone/30 bg-transparent text-bone hover:border-bone hover:bg-bone hover:text-stage",
-                  playingThis && !erroredThis
-                    ? "border-bone/60 shadow-[0_0_36px_rgba(239,233,221,0.16)]"
-                    : "",
-                ].join(" ")}
-                style={{ transitionTimingFunction: "cubic-bezier(0.22, 0.6, 0.24, 1)" }}
-              >
-                {/* Pulsing ring while playing — gentle bone breath */}
-                {playingThis && !erroredThis ? (
-                  <span
-                    aria-hidden
-                    className="pointer-events-none absolute inset-[-6px] rounded-full"
-                    style={{
-                      boxShadow: "0 0 0 1px rgba(239,233,221,0.22)",
-                      animation:
-                        "xm-detail-pulse 2.4s cubic-bezier(0.22, 0.6, 0.24, 1) infinite",
-                    }}
-                  />
-                ) : null}
-
-                {loadingThis ? (
-                  <svg
-                    viewBox="0 0 24 24"
-                    className="h-4 w-4 animate-spin sm:h-[18px] sm:w-[18px]"
-                    fill="none"
-                    aria-hidden
-                    style={{ animationDuration: "1.4s" }}
-                  >
-                    <circle
-                      cx="12"
-                      cy="12"
-                      r="9"
+            <div className="mt-5 flex flex-col gap-6 sm:flex-row sm:items-center sm:gap-7">
+              {/* Transport cluster — prev | play | next */}
+              <div className="flex items-center justify-center gap-4 sm:justify-start sm:gap-5">
+                <button
+                  type="button"
+                  onClick={handlePrev}
+                  aria-label={
+                    isReplayMode
+                      ? `Restart ${beat.title}`
+                      : "Previous production"
+                  }
+                  className="group flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full border border-bone/30 bg-transparent text-bone/85 transition-[border-color,background-color,color,box-shadow] duration-200 hover:border-bone/60 hover:text-bone hover:shadow-[0_0_18px_rgba(239,233,221,0.10)]"
+                  style={{ transitionTimingFunction: EASE_SNAP }}
+                >
+                  {isReplayMode ? (
+                    // Circular replay glyph — communicates "restart this track"
+                    // when we're far enough in that prev would be jarring.
+                    <svg
+                      viewBox="0 0 24 24"
+                      className="h-3 w-3"
+                      fill="none"
                       stroke="currentColor"
-                      strokeOpacity="0.25"
-                      strokeWidth="2"
-                    />
-                    <path
-                      d="M21 12a9 9 0 0 0-9-9"
-                      stroke="currentColor"
-                      strokeOpacity="0.85"
                       strokeWidth="2"
                       strokeLinecap="round"
+                      strokeLinejoin="round"
+                      aria-hidden
+                    >
+                      <path d="M3 12a9 9 0 1 0 3-6.7" />
+                      <polyline points="3 4 3 9 8 9" />
+                    </svg>
+                  ) : (
+                    // Skip-back: vertical bar + triangle pointing left.
+                    <svg
+                      viewBox="0 0 24 24"
+                      className="h-3 w-3"
+                      fill="currentColor"
+                      aria-hidden
+                    >
+                      <rect x="5" y="5" width="2" height="14" rx="0.5" />
+                      <path d="M19 5L8 12l11 7V5z" />
+                    </svg>
+                  )}
+                </button>
+
+                <button
+                  type="button"
+                  onClick={handlePreview}
+                  disabled={erroredThis}
+                  aria-label={
+                    erroredThis
+                      ? `Preview not yet available for ${beat.title}`
+                      : playingThis
+                        ? `Pause preview of ${beat.title}`
+                        : loadingThis
+                          ? `Loading preview of ${beat.title}`
+                          : `Play preview of ${beat.title}`
+                  }
+                  title={erroredThis ? "Not yet — coming soon" : undefined}
+                  className={[
+                    "group relative flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full border transition-[border-color,background-color,color,box-shadow,transform] duration-[700ms] sm:h-14 sm:w-14",
+                    erroredThis
+                      ? "cursor-default border-bone/15 bg-transparent text-bone/35"
+                      : "border-bone/30 bg-transparent text-bone hover:border-bone hover:bg-bone hover:text-stage",
+                    playingThis && !erroredThis
+                      ? "border-bone/60 shadow-[0_0_36px_rgba(239,233,221,0.16)]"
+                      : "",
+                  ].join(" ")}
+                  style={{ transitionTimingFunction: "cubic-bezier(0.22, 0.6, 0.24, 1)" }}
+                >
+                  {/* Pulsing ring while playing — gentle bone breath */}
+                  {playingThis && !erroredThis ? (
+                    <span
+                      aria-hidden
+                      className="pointer-events-none absolute inset-[-6px] rounded-full"
+                      style={{
+                        boxShadow: "0 0 0 1px rgba(239,233,221,0.22)",
+                        animation:
+                          "xm-detail-pulse 2.4s cubic-bezier(0.22, 0.6, 0.24, 1) infinite",
+                      }}
                     />
-                  </svg>
-                ) : playingThis ? (
+                  ) : null}
+
+                  {loadingThis ? (
+                    <svg
+                      viewBox="0 0 24 24"
+                      className="h-4 w-4 animate-spin sm:h-[18px] sm:w-[18px]"
+                      fill="none"
+                      aria-hidden
+                      style={{ animationDuration: "1.4s" }}
+                    >
+                      <circle
+                        cx="12"
+                        cy="12"
+                        r="9"
+                        stroke="currentColor"
+                        strokeOpacity="0.25"
+                        strokeWidth="2"
+                      />
+                      <path
+                        d="M21 12a9 9 0 0 0-9-9"
+                        stroke="currentColor"
+                        strokeOpacity="0.85"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                      />
+                    </svg>
+                  ) : playingThis ? (
+                    <svg
+                      viewBox="0 0 24 24"
+                      className="h-4 w-4 sm:h-[18px] sm:w-[18px]"
+                      fill="currentColor"
+                      aria-hidden
+                    >
+                      <rect x="7" y="5" width="3.2" height="14" rx="0.6" />
+                      <rect x="13.8" y="5" width="3.2" height="14" rx="0.6" />
+                    </svg>
+                  ) : (
+                    <svg
+                      viewBox="0 0 24 24"
+                      className="h-4 w-4 translate-x-[1px] sm:h-[18px] sm:w-[18px]"
+                      fill="currentColor"
+                      aria-hidden
+                    >
+                      <path d="M7 5v14l12-7L7 5z" />
+                    </svg>
+                  )}
+                </button>
+
+                <button
+                  type="button"
+                  onClick={handleNext}
+                  aria-label="Next production"
+                  className="group flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full border border-bone/30 bg-transparent text-bone/85 transition-[border-color,background-color,color,box-shadow] duration-200 hover:border-bone/60 hover:text-bone hover:shadow-[0_0_18px_rgba(239,233,221,0.10)]"
+                  style={{ transitionTimingFunction: EASE_SNAP }}
+                >
+                  {/* Skip-forward: triangle pointing right + vertical bar. */}
                   <svg
                     viewBox="0 0 24 24"
-                    className="h-4 w-4 sm:h-[18px] sm:w-[18px]"
+                    className="h-3 w-3"
                     fill="currentColor"
                     aria-hidden
                   >
-                    <rect x="7" y="5" width="3.2" height="14" rx="0.6" />
-                    <rect x="13.8" y="5" width="3.2" height="14" rx="0.6" />
+                    <path d="M5 5l11 7L5 19V5z" />
+                    <rect x="17" y="5" width="2" height="14" rx="0.5" />
                   </svg>
-                ) : (
-                  <svg
-                    viewBox="0 0 24 24"
-                    className="h-4 w-4 translate-x-[1px] sm:h-[18px] sm:w-[18px]"
-                    fill="currentColor"
-                    aria-hidden
-                  >
-                    <path d="M7 5v14l12-7L7 5z" />
-                  </svg>
-                )}
-              </button>
+                </button>
+              </div>
 
               {/* Progress strip + time readout. Thin, bone-tinted, and
                   click-to-scrub. Reads "Not yet — coming soon" when the
@@ -319,11 +421,14 @@ export default function BeatDetailClient({ beat, tiers, releaseNo }) {
                   />
                 </button>
 
-                <div
-                  className="flex items-center justify-between text-[10px] text-silver/70"
-                  style={{ letterSpacing: "0.32em", textTransform: "uppercase" }}
-                >
-                  <span>
+                {/* Status + time + inline license CTA.
+                    Mobile: status row on top, then time, then CTA below.
+                    Desktop: status left, time + CTA grouped on the right. */}
+                <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between sm:gap-5">
+                  <span
+                    className="text-[10px] text-silver/70"
+                    style={{ letterSpacing: "0.32em", textTransform: "uppercase" }}
+                  >
                     {erroredThis
                       ? "Not Yet · Coming Soon"
                       : loadingThis
@@ -334,9 +439,26 @@ export default function BeatDetailClient({ beat, tiers, releaseNo }) {
                             ? "Paused"
                             : "Tap Play"}
                   </span>
-                  <span className="font-mono text-[10px] tracking-[0.18em] text-silver/60">
-                    {formatTime(elapsed)} / {isCurrent ? formatTime(duration) : "0:00"}
-                  </span>
+
+                  <div className="flex flex-col items-start gap-3 sm:flex-row sm:items-center sm:gap-5">
+                    <span className="font-mono text-[10px] tracking-[0.18em] text-silver/60">
+                      {formatTime(elapsed)} / {isCurrent ? formatTime(duration) : "0:00"}
+                    </span>
+
+                    <button
+                      type="button"
+                      onClick={handleScrollToLicense}
+                      aria-label="Jump to licensing options"
+                      className="border border-[rgba(239,233,221,0.3)] bg-[rgba(239,233,221,0.04)] px-4 py-2 text-[10px] text-bone transition-[border-color,background-color,box-shadow] duration-200 hover:border-[rgba(239,233,221,0.6)] hover:bg-[rgba(239,233,221,0.07)] hover:shadow-[0_0_18px_rgba(239,233,221,0.10)]"
+                      style={{
+                        letterSpacing: "0.32em",
+                        textTransform: "uppercase",
+                        transitionTimingFunction: EASE_SNAP,
+                      }}
+                    >
+                      License this production
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>
@@ -344,11 +466,12 @@ export default function BeatDetailClient({ beat, tiers, releaseNo }) {
 
           {/* Licensing block — more breathing room, quieter dividers */}
           <motion.section
+            id="license"
             initial={{ opacity: 0, y: 10 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, margin: "-15%" }}
             transition={{ duration: 1.4, ease: EASE_SILK }}
-            className="mt-24 sm:mt-28"
+            className="mt-24 scroll-mt-24 sm:mt-28"
           >
             <p
               className="text-[10px] text-silver"
