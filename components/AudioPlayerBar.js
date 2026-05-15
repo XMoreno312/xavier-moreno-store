@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter, usePathname } from "next/navigation";
 import { useAudioPlayer } from "./AudioPlayerProvider";
 
 function formatTime(seconds) {
@@ -17,10 +18,27 @@ function formatTime(seconds) {
 export default function AudioPlayerBar() {
   const { currentBeat, isPlaying, progress, duration, togglePlay, seek } =
     useAudioPlayer();
+  const router = useRouter();
+  const pathname = usePathname();
 
   if (!currentBeat) return null;
 
   const currentSeconds = progress * duration;
+
+  // Mirrors the inline CTA on the beat detail page. If the visitor is
+  // already on the current beat's page, smooth-scroll to the licensing
+  // section in place. Otherwise route to that page with the hash so
+  // the browser scrolls after the navigation settles.
+  const handleLicense = () => {
+    const targetPath = `/beats/${currentBeat.id}`;
+    if (pathname === targetPath) {
+      if (typeof document === "undefined") return;
+      const el = document.getElementById("license");
+      if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+      return;
+    }
+    router.push(`${targetPath}#license`);
+  };
 
   return (
     <div className="fixed inset-x-0 bottom-0 z-40 border-t border-bone/10 bg-stage/90 backdrop-blur-md">
@@ -89,6 +107,24 @@ export default function AudioPlayerBar() {
             {formatTime(duration)}
           </span>
         </div>
+
+        {/* Inline license CTA — same vocabulary as the beat detail
+            page. Compact label on mobile so it still fits next to the
+            title; full label once the scrub line appears. */}
+        <button
+          type="button"
+          onClick={handleLicense}
+          aria-label={`Jump to licensing options for ${currentBeat.title}`}
+          className="flex-shrink-0 border border-[rgba(239,233,221,0.3)] bg-[rgba(239,233,221,0.04)] px-3 py-1.5 text-[10px] text-bone transition-[border-color,background-color,box-shadow] duration-200 hover:border-[rgba(239,233,221,0.6)] hover:bg-[rgba(239,233,221,0.07)] hover:shadow-[0_0_18px_rgba(239,233,221,0.10)] sm:px-4 sm:py-2"
+          style={{
+            letterSpacing: "0.28em",
+            textTransform: "uppercase",
+            transitionTimingFunction: "cubic-bezier(0.22, 1, 0.36, 1)",
+          }}
+        >
+          <span className="sm:hidden">License</span>
+          <span className="hidden sm:inline">License this production</span>
+        </button>
       </div>
 
       {/* Thin mobile progress — a single hairline at the bar's bottom */}
