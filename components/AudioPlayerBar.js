@@ -16,8 +16,18 @@ function formatTime(seconds) {
  * Thin, quiet, off-white on near-black. No heavy buttons.
  */
 export default function AudioPlayerBar() {
-  const { currentBeat, isPlaying, progress, duration, togglePlay, seek } =
-    useAudioPlayer();
+  const {
+    currentBeat,
+    isPlaying,
+    progress,
+    duration,
+    togglePlay,
+    seek,
+    volume,
+    muted,
+    setVolume,
+    toggleMute,
+  } = useAudioPlayer();
   const router = useRouter();
   const pathname = usePathname();
 
@@ -106,6 +116,55 @@ export default function AudioPlayerBar() {
           >
             {formatTime(duration)}
           </span>
+        </div>
+
+        {/* Volume cluster — hidden on mobile to keep the cramped bar
+            from getting noisy. Speaker glyph toggles mute; the slim
+            iris-tinted slider drags the level. Provider persists the
+            chosen level to localStorage so it survives reloads. */}
+        <div className="hidden items-center gap-3 sm:flex">
+          <button
+            type="button"
+            onClick={toggleMute}
+            aria-label={muted ? "Unmute" : "Mute"}
+            aria-pressed={muted}
+            className="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-full text-bone/75 transition-[color,box-shadow] duration-300 hover:text-bone hover:shadow-[0_0_10px_rgba(124,91,216,0.30)]"
+          >
+            {muted || volume === 0 ? (
+              // Muted — speaker with a slash
+              <svg viewBox="0 0 24 24" className="h-[14px] w-[14px]" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+                <path d="M11 5L6 9H3v6h3l5 4V5z" fill="currentColor" />
+                <line x1="22" y1="9" x2="16" y2="15" />
+                <line x1="16" y1="9" x2="22" y2="15" />
+              </svg>
+            ) : volume < 0.5 ? (
+              // Low — speaker + one wave
+              <svg viewBox="0 0 24 24" className="h-[14px] w-[14px]" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+                <path d="M11 5L6 9H3v6h3l5 4V5z" fill="currentColor" />
+                <path d="M16 9a4 4 0 0 1 0 6" />
+              </svg>
+            ) : (
+              // High — speaker + two waves
+              <svg viewBox="0 0 24 24" className="h-[14px] w-[14px]" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+                <path d="M11 5L6 9H3v6h3l5 4V5z" fill="currentColor" />
+                <path d="M16 9a4 4 0 0 1 0 6" />
+                <path d="M19 6.5a8 8 0 0 1 0 11" />
+              </svg>
+            )}
+          </button>
+          <input
+            type="range"
+            className="progress w-20"
+            min={0}
+            max={1}
+            step={0.01}
+            value={muted ? 0 : volume}
+            onChange={(e) => setVolume(parseFloat(e.target.value))}
+            aria-label="Volume"
+            aria-valuemin={0}
+            aria-valuemax={1}
+            aria-valuenow={muted ? 0 : volume}
+          />
         </div>
 
         {/* Inline license CTA — same vocabulary as the beat detail

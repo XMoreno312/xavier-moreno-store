@@ -5,10 +5,36 @@ import LayoutMain from "@/components/LayoutMain";
 import AudioPlayerProvider from "@/components/AudioPlayerProvider";
 import AudioPlayerBar from "@/components/AudioPlayerBar";
 
+// Canonical site URL — used by Next.js to resolve relative URLs in
+// Open Graph, Twitter cards, and canonical tags. DNS + hosting still
+// need to be configured separately at the registrar / Vercel.
+const SITE_URL = "https://zaemoreno.com";
+
 export const metadata = {
-  title: "Xavier Moreno",
+  metadataBase: new URL(SITE_URL),
+  title: {
+    default: "Xavier Moreno",
+    template: "%s · Xavier Moreno",
+  },
   description:
     "Productions for artists who feel everything. Xavier Moreno — singer, songwriter, producer.",
+  alternates: {
+    canonical: "/",
+  },
+  openGraph: {
+    type: "website",
+    siteName: "Xavier Moreno",
+    url: SITE_URL,
+    title: "Xavier Moreno",
+    description:
+      "Productions for artists who feel everything. Xavier Moreno — singer, songwriter, producer.",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Xavier Moreno",
+    description:
+      "Productions for artists who feel everything. Xavier Moreno — singer, songwriter, producer.",
+  },
 };
 
 export default function RootLayout({ children }) {

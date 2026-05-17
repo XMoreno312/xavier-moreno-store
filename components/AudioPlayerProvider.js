@@ -71,9 +71,65 @@ export default function AudioPlayerProvider({ children }) {
   const [loadingBeatId, setLoadingBeatId] = useState(null);
   const [erroredBeats, setErroredBeats] = useState(() => new Set());
 
+  // Volume control — kept in the provider so every player surface
+  // (bottom bar, detail page, future card hover) reads from the same
+  // source of truth. Persisted to localStorage so the listener's
+  // chosen level survives page reloads.
+  const [volume, setVolumeState] = useState(1); // 0..1
+  const [muted, setMuted] = useState(false);
+
   // Avoid SSR mismatch — only render the <audio> after hydration.
   const [mounted, setMounted] = useState(false);
   useEffect(() => setMounted(true), []);
+
+  // Hydrate persisted volume + mute on mount. Wrapped in try/catch
+  // because localStorage can throw in private-mode Safari and on
+  // certain embedded webviews.
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    try {
+      const v = window.localStorage.getItem("xm.player.volume");
+      const m = window.localStorage.getItem("xm.player.muted");
+      if (v != null) {
+        const parsed = parseFloat(v);
+        if (!Number.isNaN(parsed) && parsed >= 0 && parsed <= 1) {
+          setVolumeState(parsed);
+        }
+      }
+      if (m != null) setMuted(m === "1");
+    } catch {
+      /* localStorage unavailable — fall back to defaults. */
+    }
+  }, []);
+
+  // Push volume/mute changes to the underlying <audio> element so the
+  // listener's setting takes effect immediately, and persist them.
+  useEffect(() => {
+    const audio = audioRef.current;
+    if (audio) {
+      audio.volume = muted ? 0 : volume;
+      audio.muted = muted;
+    }
+    if (typeof window !== "undefined") {
+      try {
+        window.localStorage.setItem("xm.player.volume", String(volume));
+        window.localStorage.setItem("xm.player.muted", muted ? "1" : "0");
+      } catch {
+        /* ignore */
+      }
+    }
+  }, [volume, muted, mounted]);
+
+  const setVolume = useCallback((v) => {
+    const clamped = Math.max(0, Math.min(1, Number(v) || 0));
+    setVolumeState(clamped);
+    // Any deliberate volume change un-mutes — matches the behavior of
+    // every system player. If the listener drags to zero we keep the
+    // explicit muted flag false so the next change reads as a "fade in".
+    if (clamped > 0 && muted) setMuted(false);
+  }, [muted]);
+
+  const toggleMute = useCallback(() => setMuted((m) => !m), []);
 
   const isBeatErrored = useCallback(
     (beatId) => erroredBeats.has(beatId),
@@ -390,6 +446,10 @@ export default function AudioPlayerProvider({ children }) {
       resume,
       togglePlay,
       seek,
+      volume,
+      muted,
+      setVolume,
+      toggleMute,
     }),
     [
       currentBeat,
@@ -404,6 +464,10 @@ export default function AudioPlayerProvider({ children }) {
       resume,
       togglePlay,
       seek,
+      volume,
+      muted,
+      setVolume,
+      toggleMute,
     ],
   );
 
