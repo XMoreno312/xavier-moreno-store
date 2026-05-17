@@ -10,9 +10,9 @@ export function generateStaticParams() {
 
 export function generateMetadata({ params }) {
   const beat = getBeatById(params.id);
-  if (!beat) return { title: "Beat not found — Xavier Moreno" };
+  if (!beat) return { title: "Beat not found — Zae Moreno" };
   return {
-    title: `${beat.title} — Xavier Moreno`,
+    title: `${beat.title} — Zae Moreno`,
     description: `${beat.genre} production in ${beat.key}, ${beat.bpm} BPM. License MP3, WAV, or Exclusive.`,
   };
 }

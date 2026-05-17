@@ -97,7 +97,7 @@ function renderEmailHtml({
 
     <h3 style="font-size:14px;font-weight:bold;letter-spacing:0.04em;text-transform:uppercase;margin:28px 0 8px;color:#333;">Producer credit</h3>
     <p style="font-size:14px;line-height:1.55;margin:0 0 6px;color:#333;">
-      Please credit me as <strong>prod. Xavier Moreno</strong> in the song title or first line of the credits. Tag <em>@xaviermoreno</em> when you share the finished record — I'd love to hear it.
+      Please credit me as <strong>Produced by Zae Moreno</strong> in the song title or first line of the credits. Tag <em>@zaemoreno</em> when you share the finished record — I'd love to hear it.
     </p>
 
     <p style="font-size:13px;color:#888;margin:32px 0 0;border-top:1px solid #eee;padding-top:16px;">
@@ -128,7 +128,7 @@ async function sendDeliveryEmail({
   }
 
   const payload = {
-    from: "Xavier Moreno <onboarding@resend.dev>",
+    from: "Zae Moreno <onboarding@resend.dev>",
     to: [toEmail],
     subject,
     html,

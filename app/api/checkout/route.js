@@ -68,7 +68,7 @@ export async function POST(request) {
   // Origin used for success/cancel URLs without hardcoding the domain.
   const origin =
     request.headers.get("origin") ||
-    `https://${request.headers.get("host") || "xavier-moreno-store.vercel.app"}`;
+    `https://${request.headers.get("host") || "zaemoreno.com"}`;
 
   // Stripe expects form-encoded bodies. Build the payload manually so we
   // can express nested keys (line_items[0][price], metadata[...]).

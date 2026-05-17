@@ -7,7 +7,7 @@ import Logo from "./Logo";
 // over the dark hero via a tiny backdrop blur + semi-transparent fill.
 // Left holds the lockup (crown + wordmark). Right holds the primary
 // destinations: the catalogue, a direct invitation to work together, and
-// a direct line to Xavier.
+// a direct line to Zae.
 const navLinks = [
   { href: "/beats", label: "Productions" },
   { href: "/work-with-me", label: "Work With Me" },

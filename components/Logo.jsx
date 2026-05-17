@@ -1,11 +1,11 @@
 /**
- * Canonical Xavier Moreno brand mark — the crown + hand-lettered wordmark.
+ * Canonical Zae Moreno brand mark — the crown + hand-lettered wordmark.
  * Single source of truth: Header + Hero both import from here so the lockup
  * stays identical across the site. Update /public/XM_TM5.png to refresh.
  */
 export default function Logo({
   className = "",
-  alt = "Xavier Moreno",
+  alt = "Zae Moreno",
   style,
 }) {
   return (

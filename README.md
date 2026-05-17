@@ -1,6 +1,6 @@
 # xavier-moreno-store
 
-Beat store for Xavier Moreno — Next.js (App Router), Tailwind, no TypeScript.
+Beat store for Zae Moreno — Next.js (App Router), Tailwind, no TypeScript.
 
 ## Quick start
 

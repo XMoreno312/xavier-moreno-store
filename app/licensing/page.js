@@ -3,15 +3,15 @@ import { LICENSE_TIERS } from "@/config/beats";
 import ContactForm from "./ContactForm";
 
 export const metadata = {
-  title: "Licensing — Xavier Moreno",
+  title: "Licensing — Zae Moreno",
   description:
-    "Understand the MP3 lease, WAV lease, and exclusive license terms for productions by Xavier Moreno.",
+    "Understand the MP3 lease, WAV lease, and exclusive license terms for productions by Zae Moreno.",
 };
 
 const faqs = [
   {
     q: "Do I have to credit you?",
-    a: "Yes. Every license requires producer credit — “Produced by Xavier Moreno” — in song metadata and anywhere the song appears (album notes, streaming-platform credits, video descriptions, etc.). Exclusive terms can be negotiated.",
+    a: "Yes. Every license requires producer credit — “Produced by Zae Moreno” — in song metadata and anywhere the song appears (album notes, streaming-platform credits, video descriptions, etc.). Exclusive terms can be negotiated.",
   },
   {
     q: "Can multiple artists license the same production?",
@@ -27,7 +27,7 @@ const faqs = [
   },
   {
     q: "Does any license transfer ownership?",
-    a: "No. Every purchase is a license to use the production. Xavier Moreno retains ownership, copyright, authorship, publishing interest, producer rights, stems, melodies, arrangements, and all intellectual property in the original production. All rights not expressly granted are reserved.",
+    a: "No. Every purchase is a license to use the production. Zae Moreno retains ownership, copyright, authorship, publishing interest, producer rights, stems, melodies, arrangements, and all intellectual property in the original production. All rights not expressly granted are reserved.",
   },
 ];
 
@@ -100,7 +100,7 @@ export default function LicensingPage() {
             Ownership retained
           </p>
           <p className="mt-2 text-sm leading-relaxed text-cream/80 sm:text-base">
-            Buyers are purchasing a license, not ownership. Xavier Moreno
+            Buyers are purchasing a license, not ownership. Zae Moreno
             retains 100% of the copyright, authorship, publishing interest,
             producer rights, stems, melodies, arrangements, recordings, and
             all intellectual property connected to the original production.
@@ -191,7 +191,7 @@ export default function LicensingPage() {
             "Resell, redistribute, lease, sublicense, upload, or give away the instrumental by itself.",
             "Claim that you created, produced, composed, or own the original production.",
             "Register the beat or instrumental as your own copyright.",
-            "Use the instrumental for Content ID claims against Xavier Moreno or other licensees.",
+            "Use the instrumental for Content ID claims against Zae Moreno or other licensees.",
             "Upload the instrumental to sample packs, stock music libraries, beat stores, NFTs, or AI training datasets without prior written permission.",
           ].map((line) => (
             <li key={line} className="flex gap-3">

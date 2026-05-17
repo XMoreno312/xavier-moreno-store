@@ -65,7 +65,7 @@ export default function InTheWork() {
         >
           <Image
             src="/portraits/studio.jpg"
-            alt="Xavier Moreno in a studio, seated playing a black acoustic guitar under plum lighting."
+            alt="Zae Moreno in a studio, seated playing a black acoustic guitar under plum lighting."
             fill
             sizes="(max-width: 768px) 100vw, 40vw"
             className="object-cover"

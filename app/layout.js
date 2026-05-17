@@ -13,27 +13,27 @@ const SITE_URL = "https://zaemoreno.com";
 export const metadata = {
   metadataBase: new URL(SITE_URL),
   title: {
-    default: "Xavier Moreno",
-    template: "%s · Xavier Moreno",
+    default: "Zae Moreno",
+    template: "%s · Zae Moreno",
   },
   description:
-    "Productions for artists who feel everything. Xavier Moreno — singer, songwriter, producer.",
+    "Productions for artists who feel everything. Zae Moreno — singer, songwriter, producer.",
   alternates: {
     canonical: "/",
   },
   openGraph: {
     type: "website",
-    siteName: "Xavier Moreno",
+    siteName: "Zae Moreno",
     url: SITE_URL,
-    title: "Xavier Moreno",
+    title: "Zae Moreno",
     description:
-      "Productions for artists who feel everything. Xavier Moreno — singer, songwriter, producer.",
+      "Productions for artists who feel everything. Zae Moreno — singer, songwriter, producer.",
   },
   twitter: {
     card: "summary_large_image",
-    title: "Xavier Moreno",
+    title: "Zae Moreno",
     description:
-      "Productions for artists who feel everything. Xavier Moreno — singer, songwriter, producer.",
+      "Productions for artists who feel everything. Zae Moreno — singer, songwriter, producer.",
   },
 };
 

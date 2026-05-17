@@ -495,7 +495,7 @@ export default function BeatDetailClient({ beat, tiers, releaseNo }) {
               transfer of ownership. All leases are delivered untagged. An
               exclusive license grants exclusive usage rights for one released
               recording; the production is removed from the catalogue once the
-              exclusive is completed. Xavier Moreno retains ownership,
+              exclusive is completed. Zae Moreno retains ownership,
               copyright, authorship, publishing interest, producer rights, and
               all intellectual property in the original production.
             </p>
@@ -602,7 +602,7 @@ export default function BeatDetailClient({ beat, tiers, releaseNo }) {
                   </Link>
                   . I understand that I am purchasing usage rights only and
                   that ownership of the original production remains with
-                  Xavier Moreno.
+                  Zae Moreno.
                 </span>
               </label>
             </div>
@@ -657,7 +657,7 @@ export default function BeatDetailClient({ beat, tiers, releaseNo }) {
               >
                 Terms of Service
               </Link>
-              . All rights not expressly granted are reserved by Xavier Moreno.
+              . All rights not expressly granted are reserved by Zae Moreno.
             </p>
 
             {checkoutError ? (

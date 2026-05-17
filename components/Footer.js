@@ -23,7 +23,7 @@ export default function Footer() {
     >
       <div className="mx-auto flex max-w-6xl flex-col gap-8 sm:flex-row sm:items-start sm:justify-between">
         <div>
-          <p className="font-display tracking-[0.18em] text-cream">XAVIER MORENO</p>
+          <p className="font-display tracking-[0.18em] text-cream">ZAE MORENO</p>
           <p className="mt-1 text-xs uppercase tracking-[0.2em] text-cream/40">
             Productions / Licensing
           </p>
@@ -56,7 +56,7 @@ export default function Footer() {
             </a>
           </p>
           <p className="mt-2 text-cream/30">
-            © {new Date().getFullYear()} Xavier Moreno. All rights reserved.
+            © {new Date().getFullYear()} Zae Moreno. All rights reserved.
           </p>
         </div>
       </div>

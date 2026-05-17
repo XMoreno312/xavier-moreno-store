@@ -24,7 +24,7 @@ const VIEWPORT = { once: true, amount: 0.25 };
 export default function AtmosphericBio() {
   return (
     <section
-      aria-label="Xavier Moreno — bio"
+      aria-label="Zae Moreno — bio"
       className="relative w-full overflow-hidden bg-stage text-bone"
       style={{ minHeight: "70vh" }}
     >
@@ -238,7 +238,7 @@ export default function AtmosphericBio() {
             textShadow: "0 2px 28px rgba(0,0,0,0.55)",
           }}
         >
-          Xavier Moreno.
+          Zae Moreno.
         </motion.h2>
 
         <motion.p

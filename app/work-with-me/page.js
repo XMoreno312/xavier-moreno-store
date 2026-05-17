@@ -82,7 +82,7 @@ export default function WorkWithMePage() {
               className="mt-5 block text-[10px] not-italic text-silver"
               style={{ letterSpacing: "0.42em", textTransform: "uppercase" }}
             >
-              — Xavier
+              — Zae
             </span>
           </motion.blockquote>
         </section>

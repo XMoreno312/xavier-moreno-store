@@ -6,9 +6,9 @@ import NewsletterBand from "@/components/newsletter/NewsletterBand";
 import SectionReveal from "@/components/SectionReveal";
 
 export const metadata = {
-  title: "Xavier Moreno",
+  title: "Zae Moreno",
   description:
-    "Productions for artists who feel everything. Xavier Moreno — singer, songwriter, producer.",
+    "Productions for artists who feel everything. Zae Moreno — singer, songwriter, producer.",
 };
 
 export default function HomePage() {

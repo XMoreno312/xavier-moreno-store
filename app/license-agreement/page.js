@@ -2,9 +2,9 @@ import Link from "next/link";
 import LegalPage from "@/components/LegalPage";
 
 export const metadata = {
-  title: "License Agreement — Xavier Moreno",
+  title: "License Agreement — Zae Moreno",
   description:
-    "The license agreement that governs every production purchased from Xavier Moreno.",
+    "The license agreement that governs every production purchased from Zae Moreno.",
 };
 
 export default function LicenseAgreementPage() {
@@ -16,7 +16,7 @@ export default function LicenseAgreementPage() {
     >
       <p>
         This License Agreement (the &ldquo;Agreement&rdquo;) is entered into
-        between Xavier Moreno (&ldquo;Licensor&rdquo;) and the purchaser
+        between Zae Moreno (&ldquo;Licensor&rdquo;) and the purchaser
         (&ldquo;Licensee&rdquo;). By purchasing a license through this site,
         Licensee agrees to be bound by this Agreement, the{" "}
         <Link href="/terms-of-service">Terms of Service</Link>, and the{" "}
@@ -34,7 +34,7 @@ export default function LicenseAgreementPage() {
         </strong>
       </p>
 
-      <h2>2. Ownership Retained by Xavier Moreno</h2>
+      <h2>2. Ownership Retained by Zae Moreno</h2>
       <p>
         Licensor retains 100% of all right, title, and interest in and to the
         Production, including without limitation:
@@ -49,7 +49,7 @@ export default function LicenseAgreementPage() {
       </ul>
       <p>
         <strong>All rights not expressly granted to Licensee in this Agreement
-        are reserved by Xavier Moreno.</strong>
+        are reserved by Zae Moreno.</strong>
       </p>
 
       <h2>3. License Tiers</h2>
@@ -60,7 +60,7 @@ export default function LicenseAgreementPage() {
         <li>MP3 file delivery (untagged, 320 kbps)</li>
         <li>Allowed for one (1) commercial recording</li>
         <li>Up to 10,000 streams across all platforms</li>
-        <li>Producer credit required: &ldquo;Produced by Xavier Moreno&rdquo;</li>
+        <li>Producer credit required: &ldquo;Produced by Zae Moreno&rdquo;</li>
         <li>No ownership transfer</li>
       </ul>
 
@@ -71,7 +71,7 @@ export default function LicenseAgreementPage() {
         <li>Allowed for one (1) commercial recording</li>
         <li>Higher stream limit than the MP3 lease (currently up to 50,000 streams across all platforms; the figure in effect at time of purchase will be stated on your receipt)</li>
         <li>Monetization on YouTube permitted</li>
-        <li>Producer credit required: &ldquo;Produced by Xavier Moreno&rdquo;</li>
+        <li>Producer credit required: &ldquo;Produced by Zae Moreno&rdquo;</li>
         <li>No ownership transfer</li>
       </ul>
 
@@ -81,8 +81,8 @@ export default function LicenseAgreementPage() {
         <li>Production removed from public sale after the exclusive license is completed</li>
         <li>No further non-exclusive licenses will be sold after the exclusive license is completed</li>
         <li>Previously sold non-exclusive licenses remain valid in accordance with their original terms</li>
-        <li>Xavier Moreno retains ownership, copyright, authorship, publishing interest in the original Production, producer rights, and intellectual property</li>
-        <li>Producer credit required: &ldquo;Produced by Xavier Moreno&rdquo;</li>
+        <li>Zae Moreno retains ownership, copyright, authorship, publishing interest in the original Production, producer rights, and intellectual property</li>
+        <li>Producer credit required: &ldquo;Produced by Zae Moreno&rdquo;</li>
         <li>Final exclusive terms must be confirmed in writing before delivery</li>
       </ul>
 
@@ -92,7 +92,7 @@ export default function LicenseAgreementPage() {
         <li>Resell, redistribute, lease, sublicense, upload, or give away the instrumental by itself</li>
         <li>Claim that Licensee created, produced, composed, or owns the original Production</li>
         <li>Register the beat or instrumental as Licensee&rsquo;s own copyright</li>
-        <li>Use the instrumental for Content ID claims against Xavier Moreno or other licensees</li>
+        <li>Use the instrumental for Content ID claims against Zae Moreno or other licensees</li>
         <li>Upload the instrumental to sample packs, stock music libraries, beat stores, NFTs, or AI training datasets without prior written permission</li>
       </ul>
       <p>
@@ -103,7 +103,7 @@ export default function LicenseAgreementPage() {
       <h2>5. Producer Credit</h2>
       <p>
         All releases that use the Production must include the credit
-        &ldquo;Produced by Xavier Moreno&rdquo; in the song metadata and in any
+        &ldquo;Produced by Zae Moreno&rdquo; in the song metadata and in any
         visible credit list (album notes, streaming-platform credits, video
         descriptions, and the like).
       </p>
@@ -132,7 +132,7 @@ export default function LicenseAgreementPage() {
 
       <h2>9. Governing Law</h2>
       <p>
-        This Agreement is governed by the laws of the state in which Xavier
+        This Agreement is governed by the laws of the state in which Zae
         Moreno resides at the time of purchase, without regard to conflict-of-
         law principles.
       </p>

@@ -2,7 +2,7 @@ import Link from "next/link";
 import LegalPage from "@/components/LegalPage";
 
 export const metadata = {
-  title: "Terms of Service — Xavier Moreno",
+  title: "Terms of Service — Zae Moreno",
   description:
     "The terms that govern use of xaviermoreno.com and any license purchased through the site.",
 };
@@ -18,11 +18,11 @@ export default function TermsOfServicePage() {
         <Link href="/privacy-policy">Privacy Policy</Link>.
       </p>
 
-      <h2>1. About Xavier Moreno</h2>
+      <h2>1. About Zae Moreno</h2>
       <p>
-        This site is operated by Xavier Moreno, an independent producer,
+        This site is operated by Zae Moreno, an independent producer,
         songwriter, and recording artist (&ldquo;we,&rdquo; &ldquo;us,&rdquo;
-        &ldquo;Xavier Moreno&rdquo;). The site offers licenses to musical
+        &ldquo;Zae Moreno&rdquo;). The site offers licenses to musical
         productions and instrumentals (each, a &ldquo;Production&rdquo;). It
         does not sell or transfer ownership of any Production.
       </p>
@@ -42,7 +42,7 @@ export default function TermsOfServicePage() {
         producer rights, stems, melodies, arrangements, the master recording of
         the instrumental, or any other intellectual-property right in the
         Production. <strong>All rights not expressly granted are reserved by
-        Xavier Moreno.</strong>
+        Zae Moreno.</strong>
       </p>
 
       <h2>4. Payment</h2>
@@ -83,7 +83,7 @@ export default function TermsOfServicePage() {
       <h2>8. Intellectual Property</h2>
       <p>
         All Productions, audio files, artwork, photography, copy, and the site
-        itself remain the exclusive property of Xavier Moreno. All rights not
+        itself remain the exclusive property of Zae Moreno. All rights not
         expressly granted are reserved.
       </p>
 
@@ -96,16 +96,16 @@ export default function TermsOfServicePage() {
 
       <h2>10. Limitation of Liability</h2>
       <p>
-        To the maximum extent permitted by law, Xavier Moreno&rsquo;s total
+        To the maximum extent permitted by law, Zae Moreno&rsquo;s total
         liability arising from your use of this site or any license purchased
         through it is limited to the amount you actually paid for the relevant
-        license. Xavier Moreno is not liable for indirect, incidental,
+        license. Zae Moreno is not liable for indirect, incidental,
         consequential, or punitive damages.
       </p>
 
       <h2>11. Governing Law</h2>
       <p>
-        These Terms are governed by the laws of the state in which Xavier
+        These Terms are governed by the laws of the state in which Zae
         Moreno resides at the time of purchase, without regard to conflict-of-
         law principles.
       </p>

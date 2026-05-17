@@ -14,7 +14,7 @@ const VIEWPORT = { once: true, amount: 0.35 };
 export default function PortraitBio() {
   return (
     <section
-      aria-label="Xavier Moreno — portrait and bio"
+      aria-label="Zae Moreno — portrait and bio"
       className="relative w-full bg-stage text-bone"
       style={{ minHeight: "90vh" }}
     >
@@ -51,7 +51,7 @@ export default function PortraitBio() {
         >
           <Image
             src="/portraits/rooftop.jpg"
-            alt="Xavier Moreno on a rooftop at blue hour, holding a guitar, Los Angeles skyline behind."
+            alt="Zae Moreno on a rooftop at blue hour, holding a guitar, Los Angeles skyline behind."
             fill
             priority={false}
             sizes="(max-width: 768px) 100vw, 55vw"
@@ -100,7 +100,7 @@ export default function PortraitBio() {
               letterSpacing: "-0.01em",
             }}
           >
-            Xavier Moreno.
+            Zae Moreno.
           </motion.h2>
 
           <motion.p

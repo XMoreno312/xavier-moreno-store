@@ -2,9 +2,9 @@ import Link from "next/link";
 import LegalPage from "@/components/LegalPage";
 
 export const metadata = {
-  title: "Privacy Policy — Xavier Moreno",
+  title: "Privacy Policy — Zae Moreno",
   description:
-    "How Xavier Moreno collects, uses, and protects your information on this site.",
+    "How Zae Moreno collects, uses, and protects your information on this site.",
 };
 
 export default function PrivacyPolicyPage() {

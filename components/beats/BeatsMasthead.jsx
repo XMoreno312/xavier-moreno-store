@@ -183,7 +183,7 @@ export default function BeatsMasthead() {
               // but same clamp grammar so it scales with the same character.
               height: "clamp(5.5rem, 18vw, 10.5rem)",
             }}
-            alt="Xavier Moreno"
+            alt="Zae Moreno"
           />
         </motion.div>
 
